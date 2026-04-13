@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>스킬 서바이버 (모바일)</title>
+    <style>
+        body { 
+            background-color: #0d0d0d; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0; color: white; font-family: 'Malgun Gothic', sans-serif; 
+            overflow: hidden; user-select: none; touch-action: none; /* 모바일 스크롤 및 새로고침 방지 */
+        }
+        canvas { 
+            background-color: #1a1515; display: none; width: 100vw; height: 100vh; 
+        }
+        
+        #start-screen { position: absolute; display: flex; flex-direction: column; align-items: center; z-index: 20; width: 100%; }
+        #start-screen h1 { font-size: 40px; color: #e74c3c; text-shadow: 0 0 15px #000; margin-bottom: 30px; text-align: center; }
+        .diff-btn { width: 80%; max-width: 250px; padding: 15px; margin: 10px; font-size: 20px; font-weight: bold; cursor: pointer; border: 3px solid #fff; border-radius: 10px; transition: 0.3s; color: white; }
+        #normal-btn { background: #27ae60; }
+        #hard-btn { background: #8e44ad; }
+
+        #hud { position: absolute; top: 10px; width: 100%; display: none; justify-content: space-around; padding: 0 10px; box-sizing: border-box; pointer-events: none; z-index: 5; }
+        .stat-box { background: rgba(0,0,0,0.8); padding: 5px 10px; border-radius: 8px; border: 1px solid #777; font-weight: bold; font-size: 14px; color: #ecf0f1; }
+        
+        /* 모바일에서는 스킬 패널을 상단 우측 작게 표시 */
+        #skill-panel { position: absolute; right: 10px; top: 60px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; border: 1px solid #f1c40f; z-index: 6; pointer-events: none; display: none; }
+        #skill-panel h3 { margin: 0 0 5px 0; color: #f1c40f; font-size: 14px; text-align: center; }
+        #skill-panel ul { list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 1.5; color: #ddd; }
+
+        #level-up-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+        
+        /* 💡 모바일용 카드 세로 배치 */
+        #cards-container { display: flex; flex-direction: column; gap: 15px; width: 90%; max-width: 350px; align-items: center; }
+        
+        @keyframes popIn {
+            0% { opacity: 0; transform: translateY(50px) scale(0.8); }
+            70% { opacity: 1; transform: translateY(-5px) scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card { 
+            background: #34495e; border: 2px solid #f1c40f; border-radius: 12px; 
+            width: 100%; padding: 15px; display: flex; flex-direction: row; align-items: center; 
+            cursor: pointer; transition: transform 0.2s, background 0.2s; box-sizing: border-box;
+            opacity: 0; animation: popIn 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+        }
+        .card-icon { font-size: 40px; margin-right: 15px; }
+        .card-text { display: flex; flex-direction: column; flex: 1; }
+        .card-text h3 { margin: 0 0 5px 0; font-size: 18px; color: white; }
+        .card-desc { font-size: 12px; color: #ccc; line-height: 1.3; }
+        
+        .card:active { transform: scale(0.95); background: #3d566e; }
+        .card.animating:active { transform: none; background: #34495e; }
+
+        #dialogue { position: absolute; bottom: 15%; font-size: 20px; font-weight: bold; color: #e74c3c; font-style: italic; text-shadow: 0 0 10px #000; display: none; z-index: 15; text-align: center; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1>SKILL SURVIVOR<br><span style="font-size:20px; color:#ddd;">(Mobile Edition)</span></h1>
+        <button id="normal-btn" class="diff-btn">일반 모드</button>
+        <button id="hard-btn" class="diff-btn">하드 모드</button>
+    </div>
+
+    <div id="hud">
+        <div class="stat-box">❤️ <span id="hp">100</span></div>
+        <div class="stat-box">⏱️ <span id="timer">00:00</span></div>
+        <div class="stat-box">⭐ <span id="score">0</span></div>
+    </div>
+
+    <div id="skill-panel">
+        <h3>스킬</h3>
+        <ul id="skill-ul"></ul>
+    </div>
+
+    <div id="dialogue"></div>
+
+    <div id="level-up-screen">
+        <h2 style="color:#f1c40f; margin-bottom: 20px;">스킬 선택</h2>
+        <div id="cards-container"></div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // 화면 크기에 맞게 캔버스 사이즈 조정
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let score = 0, gameTime = 0, lastTimestamp = 0;
+    let difficultyLevel = 1, isHardMode = false;
+    let levelCount = 0, nextLevelScore = 150; // 모바일은 초반 레벨업을 더 빠르게
+    let lastBossSpawnInterval = 0; 
+    let isGameOver = false, isPaused = false, gameActive = false;
+    let bossSpawned = false;
+    let isCardAnimating = false;
+
+    // 💡 터치 조이스틱 변수
+    let touchX = 0, touchY = 0, joyBaseX = 0, joyBaseY = 0, isTouching = false;
+
+    const player = {
+        x: canvas.width / 2, y: canvas.height / 2, radius: 12, hitbox: 5, color: '#3498db',
+        hp: 100, maxHp: 100, iFrames: 0, lastFireTime: 0,
+        skills: { bounce: 0, multishot: 1, firerate: 0, speed: 0, damage: 0 }
+    };
+
+    let bullets = [], enemies = [];
+
+    document.getElementById('normal-btn').onclick = () => startGame(false);
+    document.getElementById('hard-btn').onclick = () => startGame(true);
+
+    function startGame(hard) {
+        isHardMode = hard;
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('hud').style.display = 'flex';
+        document.getElementById('skill-panel').style.display = 'block';
+        canvas.style.display = 'block';
+        
+        // 시작 시 캐릭터 중앙 배치
+        player.x = canvas.width / 2;
+        player.y = canvas.height / 2;
+
+        gameActive = true;
+        spawnEnemy();
+        updateSkillUI();
+        requestAnimationFrame(update);
+    }
+
+    function showDialogue(text, duration) {
+        const d = document.getElementById('dialogue');
+        d.innerText = text; d.style.display = 'block';
+        setTimeout(() => d.style.display = 'none', duration);
+    }
+
+    function updateSkillUI() {
+        const ul = document.getElementById('skill-ul');
+        ul.innerHTML = '';
+        if(player.skills.bounce > 0) ul.innerHTML += `<li>🪃 Lv.${player.skills.bounce}</li>`;
+        if(player.skills.multishot > 1) ul.innerHTML += `<li>🔫 Lv.${player.skills.multishot}</li>`;
+        if(player.skills.firerate > 0) ul.innerHTML += `<li>⚡ Lv.${player.skills.firerate}</li>`;
+        if(player.skills.speed > 0) ul.innerHTML += `<li>👟 Lv.${player.skills.speed}</li>`;
+        if(player.skills.damage > 0) ul.innerHTML += `<li>💥 Lv.${player.skills.damage}</li>`;
+        if(ul.innerHTML === '') ul.innerHTML = `<li>-</li>`;
+    }
+
+    const abilityPool = [
+        { id: 'bounce', icon: '🪃', name: '스마트 도탄', desc: '벽에 닿으면 적에게 유도' },
+        { id: 'multishot', icon: '🔫', name: '멀티샷', desc: '발사체 수 증가' },
+        { id: 'firerate', icon: '⚡', name: '신속 사격', desc: '발사 속도 증가' },
+        { id: 'speed', icon: '👟', name: '기동성', desc: '이동 속도 증가' },
+        { id: 'damage', icon: '💥', name: '파괴력', desc: '데미지 증가' },
+        { id: 'heal', icon: '💊', name: '긴급 치유', desc: '체력 40 회복' }
+    ];
+
+    function checkLevelUp() {
+        if (score >= nextLevelScore) {
+            levelCount++;
+            nextLevelScore += 150 + (levelCount * 50);
+            showCards();
+        }
+    }
+
+    function showCards() {
+        isPaused = true;
+        isCardAnimating = true; 
+        isTouching = false; // 레벨업 시 조이스틱 초기화
+        
+        const container = document.getElementById('cards-container');
+        container.innerHTML = '';
+        const selected = [...abilityPool].sort(() => 0.5 - Math.random()).slice(0, 3);
+        
+        selected.forEach((ab, index) => {
+            const card = document.createElement('div');
+            card.className = 'card animating'; 
+            card.style.animationDelay = `${index * 0.15}s`;
+            
+            card.innerHTML = `
+                <div class="card-icon">${ab.icon}</div>
+                <div class="card-text">
+                    <h3>${ab.name}</h3>
+                    <div class="card-desc">${ab.desc}</div>
+                </div>
+            `;
+            
+            card.onclick = () => {
+                if (isCardAnimating) return; 
+                
+                if (ab.id === 'bounce') player.skills.bounce++;
+                if (ab.id === 'multishot') player.skills.multishot++;
+                if (ab.id === 'firerate') player.skills.firerate++;
+                if (ab.id === 'speed') player.skills.speed++;
+                if (ab.id === 'damage') player.skills.damage++;
+                if (ab.id === 'heal') { player.hp = Math.min(100, player.hp + 40); document.getElementById('hp').innerText = Math.ceil(player.hp); }
+                
+                updateSkillUI();
+                document.getElementById('level-up-screen').style.display = 'none';
+                isPaused = false; lastTimestamp = performance.now();
+            };
+            container.appendChild(card);
+        });
+        
+        document.getElementById('level-up-screen').style.display = 'flex';
+        
+        setTimeout(() => {
+            isCardAnimating = false;
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('animating'));
+        }, 800);
+    }
+
+    // 💡 터치 이벤트 처리 (조이스틱)
+    canvas.addEventListener('touchstart', e => {
+        if (!gameActive || isPaused) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        joyBaseX = touch.clientX;
+        joyBaseY = touch.clientY;
+        touchX = touch.clientX;
+        touchY = touch.clientY;
+        isTouching = true;
+    }, {passive: false});
+
+    canvas.addEventListener('touchmove', e => {
+        if (!gameActive || isPaused || !isTouching) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        touchX = touch.clientX;
+        touchY = touch.clientY;
+    }, {passive: false});
+
+    canvas.addEventListener('touchend', e => {
+        e.preventDefault();
+        isTouching = false;
+    }, {passive: false});
+
+    function getNearestEnemy(x, y) {
+        let nearest = null;
+        let minDist = Infinity;
+        for (let e of enemies) {
+            if(e.type === 'calamitas' && e.invincible) continue; 
+            let dist = Math.hypot(e.x - x, e.y - y);
+            if (dist < minDist) { minDist = dist; nearest = e; }
+        }
+        return nearest;
+    }
+
+    // 💡 자동 사격 로직 (가장 가까운 적을 향해)
+    function autoShoot() {
+        const now = Date.now();
+        const currentFireRate = Math.max(50, 400 - (player.skills.firerate * 70));
+        if (now - player.lastFireTime < currentFireRate) return;
+
+        let target = getNearestEnemy(player.x, player.y);
+        if (target) {
+            player.lastFireTime = now;
+            const angle = Math.atan2(target.y - player.y, target.x - player.x);
+            const currentDamage = 10 + (player.skills.damage * 5);
+
+            for (let i = 0; i < player.skills.multishot; i++) {
+                const spread = (i - (player.skills.multishot - 1) / 2) * 0.2;
+                bullets.push({
+                    x: player.x, y: player.y, radius: 4, color: '#3498db', fromPlayer: true, damage: currentDamage,
+                    velocity: { x: Math.cos(angle + spread) * 10, y: Math.sin(angle + spread) * 10 },
+                    bounceLeft: player.skills.bounce 
+                });
+            }
+        }
+    }
+
+    function spawnEnemy() {
+        if (isGameOver || isPaused || !gameActive) { setTimeout(spawnEnemy, 1000); return; }
+        if (!bossSpawned) { 
+            const type = Math.random() > 0.6 ? 'ranged' : 'melee';
+            let x, y;
+            // 화면 밖에서 생성
+            if (Math.random() < 0.5) {
+                x = Math.random() < 0.5 ? -30 : canvas.width + 30;
+                y = Math.random() * canvas.height;
+            } else {
+                x = Math.random() * canvas.width;
+                y = Math.random() < 0.5 ? -30 : canvas.height + 30;
+            }
+            
+            const hp = (type === 'melee' ? 30 : 20) * difficultyLevel * (isHardMode ? 1.5 : 1);
+            enemies.push({ x, y, radius: (type==='melee'?12:10), type, hp, maxHp: hp, color: type==='melee'?'#2ecc71':'#9b59b6', timer: 0 });
+        }
+        setTimeout(spawnEnemy, Math.max(400, 1500 - (gameTime * 15)));
+    }
+
+    function spawnBoss() {
+        bossSpawned = true;
+        showDialogue("보스 출현!", 3000);
+        
+        let hp = 300 * difficultyLevel * (isHardMode ? 1.5 : 1);
+        enemies.push({
+            x: canvas.width / 2, y: -50, radius: 35, type: 'calamitas',
+            hp: hp, maxHp: hp, color: '#c0392b',
+            state: 'phase1_hover', timer: 0, attackStep: 0,
+            flags: { bh1: false, bros: false, seekers: false, bh2: false },
+            seekers: [], brothersAlive: 0, angleOffset: 0
+        });
+    }
+
+    function spawnBulletEnemy(x, y, angle, speed, color, radius, damage, props = {}) {
+        bullets.push({ x, y, radius, color, fromPlayer: false, damage, velocity: { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed }, ...props });
+    }
+
+    function update(timestamp) {
+        if (isGameOver || !gameActive) return;
+        const deltaTime = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+
+        if (!isPaused) {
+            gameTime += deltaTime;
+            difficultyLevel = 1 + (gameTime / 60) * 0.5;
+            
+            let currentInterval = Math.floor(gameTime / 90);
+            if (currentInterval > lastBossSpawnInterval) {
+                spawnBoss();
+                lastBossSpawnInterval = currentInterval;
+            }
+
+            document.getElementById('timer').innerText = `${String(Math.floor(gameTime/60)).padStart(2,'0')}:${String(Math.floor(gameTime%60)).padStart(2,'0')}`;
+
+            // 무적 시간 감소
+            if (player.iFrames > 0) player.iFrames -= deltaTime;
+
+            // 💡 플레이어 이동 (가상 조이스틱)
+            const currentSpeed = 3.5 + (player.skills.speed * 0.5);
+            if (isTouching) {
+                let dx = touchX - joyBaseX;
+                let dy = touchY - joyBaseY;
+                let dist = Math.hypot(dx, dy);
+                let maxDist = 40; // 조이스틱 최대 반지름
+                
+                if (dist > maxDist) {
+                    dx = (dx / dist) * maxDist;
+                    dy = (dy / dist) * maxDist;
+                }
+                
+                let moveX = (dx / maxDist) * currentSpeed;
+                let moveY = (dy / maxDist) * currentSpeed;
+                
+                player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x + moveX));
+                player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y + moveY));
+            }
+
+            // 자동 사격 실행
+            autoShoot();
+
+            // 총알 처리
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                let b = bullets[i];
+                b.x += b.velocity.x; b.y += b.velocity.y;
+
+                if (b.homing) {
+                    const hAngle = Math.atan2(player.y - b.y, player.x - b.x);
+                    b.velocity.x += Math.cos(hAngle) * 0.2; b.velocity.y += Math.sin(hAngle) * 0.2;
+                    const speed = Math.hypot(b.velocity.x, b.velocity.y);
+                    if (speed > 4) { b.velocity.x = (b.velocity.x/speed)*4; b.velocity.y = (b.velocity.y/speed)*4; }
+                }
+
+                if (b.fromPlayer && (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height)) {
+                    if (b.bounceLeft > 0) {
+                        b.bounceLeft--;
+                        b.x = Math.max(1, Math.min(canvas.width - 1, b.x));
+                        b.y = Math.max(1, Math.min(canvas.height - 1, b.y));
+                        
+                        let target = getNearestEnemy(b.x, b.y);
+                        if (target) {
+                            let angle = Math.atan2(target.y - b.y, target.x - b.x);
+                            let speed = Math.hypot(b.velocity.x, b.velocity.y);
+                            b.velocity.x = Math.cos(angle) * speed;
+                            b.velocity.y = Math.sin(angle) * speed;
+                        } else {
+                            if (b.x <= 1 || b.x >= canvas.width - 1) b.velocity.x *= -1;
+                            if (b.y <= 1 || b.y >= canvas.height - 1) b.velocity.y *= -1;
+                        }
+                    } else {
+                        bullets.splice(i, 1); continue;
+                    }
+                } else if (!b.fromPlayer && (b.x < -50 || b.x > canvas.width+50 || b.y < -50 || b.y > canvas.height+50)) {
+                    bullets.splice(i, 1); continue;
+                }
+                
+                if (!b.fromPlayer && player.iFrames <= 0 && Math.hypot(player.x - b.x, player.y - b.y) < player.hitbox + b.radius) {
+                    player.hp -= b.damage; player.iFrames = 1.0; 
+                    document.getElementById('hp').innerText = Math.max(0, Math.ceil(player.hp));
+                    if (!b.pierce) bullets.splice(i, 1);
+                    if (player.hp <= 0) endGame();
+                }
+            }
+
+            // 적 처리
+            for (let ei = enemies.length - 1; ei >= 0; ei--) {
+                let e = enemies[ei];
+                const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
+                const angleToPlayer = Math.atan2(player.y - e.y, player.x - e.x);
+
+                if (player.iFrames <= 0 && distToPlayer < player.hitbox + e.radius) {
+                    player.hp -= 15; player.iFrames = 1.0;
+                    document.getElementById('hp').innerText = Math.max(0, Math.ceil(player.hp));
+                    if (player.hp <= 0) endGame();
+                }
+
+                if (e.type === 'melee') {
+                    e.x += Math.cos(angleToPlayer) * 2.0; e.y += Math.sin(angleToPlayer) * 2.0;
+                } else if (e.type === 'ranged') {
+                    e.timer += deltaTime;
+                    if (distToPlayer > 200) { e.x += Math.cos(angleToPlayer)*1.2; e.y += Math.sin(angleToPlayer)*1.2; }
+                    if (e.timer > 3.5) { spawnBulletEnemy(e.x, e.y, angleToPlayer, 2.5, '#9b59b6', 4, 10); e.timer = 0; }
+                } else if (e.type === 'calamitas') {
+                    let hpPct = e.hp / e.maxHp;
+                    e.timer += deltaTime; e.angleOffset += deltaTime; 
+                    let isInvincible = false;
+                    
+                    if (hpPct <= 0.7 && !e.flags.bh1) { e.flags.bh1 = true; e.state = 'bullet_hell_1'; e.timer = 0; showDialogue("탄막 지옥!", 2000); }
+                    if (hpPct <= 0.4 && !e.flags.bros) { 
+                        e.flags.bros = true; 
+                        let bHp = 150 * difficultyLevel; 
+                        enemies.push({ x: e.x-60, y: e.y, radius: 25, type: 'cataclysm', hp: bHp, maxHp: bHp, color: '#e67e22', timer: 0 });
+                        enemies.push({ x: e.x+60, y: e.y, radius: 25, type: 'catastrophe', hp: bHp, maxHp: bHp, color: '#d35400', timer: 0 });
+                    }
+                    if (hpPct <= 0.1 && !e.flags.bh2) { e.flags.bh2 = true; e.state = 'bullet_hell_2'; e.timer = 0; showDialogue("발악 패턴!", 2000); }
+
+                    e.brothersAlive = enemies.filter(en => en.type === 'cataclysm' || en.type === 'catastrophe').length;
+                    if (isHardMode && e.brothersAlive > 0) isInvincible = true;
+
+                    // 보스 이동 및 공격 패턴 (모바일 뷰에 맞춰 범위 축소)
+                    if (e.state === 'phase1_hover') {
+                        let tx = player.x + Math.cos(e.angleOffset)*150; let ty = player.y - 150;
+                        e.x += (tx - e.x) * 0.05; e.y += (ty - e.y) * 0.05;
+                        if (e.timer > 2) {
+                            if (e.attackStep === 0 || e.attackStep === 1) {
+                                spawnBulletEnemy(e.x, e.y, angleToPlayer, 4, '#c0392b', 8, 15);
+                                e.attackStep++; e.timer = 1.5; 
+                            } else { e.state = 'phase1_align'; e.timer = 0; e.attackStep = 0; }
+                        }
+                    } else if (e.state === 'phase1_align') {
+                        let tx = player.x + (e.x > player.x ? 200 : -200); let ty = player.y;
+                        e.x += (tx - e.x) * 0.08; e.y += (ty - e.y) * 0.08;
+                        if (e.timer > 1.5) { e.state = 'phase1_blasts'; e.timer = 0; e.attackStep = 0; }
+                    } else if (e.state === 'phase1_blasts') {
+                        if (e.brothersAlive > 0) { e.state = 'phase1_hover'; e.timer = 0; }
+                        else {
+                            if (e.timer > 0.3) {
+                                spawnBulletEnemy(e.x, e.y, angleToPlayer, 7, '#e74c3c', 5, 10);
+                                e.attackStep++; e.timer = 0;
+                            }
+                            if (e.attackStep >= 3) { e.state = 'phase1_hover'; e.timer = 0; e.attackStep = 0; }
+                        }
+                    } else if (e.state === 'bullet_hell_1' || e.state === 'bullet_hell_2') {
+                        isInvincible = true;
+                        e.x += (canvas.width/2 - e.x) * 0.05; e.y += (canvas.height/2 - e.y) * 0.05;
+                        if (Math.floor(e.timer * 10) % 3 === 0) {
+                            spawnBulletEnemy(e.x, e.y, e.angleOffset * 4, 3, '#e74c3c', 5, 15);
+                            spawnBulletEnemy(e.x, e.y, e.angleOffset * 4 + Math.PI, 3, '#e74c3c', 5, 15);
+                        }
+                        if (e.timer > 10) { e.state = 'phase1_hover'; e.timer = 0; }
+                    }
+                    e.invincible = isInvincible;
+                } else if (e.type === 'cataclysm') {
+                    e.timer += deltaTime;
+                    if (e.timer < 3) {
+                        e.x += (player.x - e.x) * 0.02; e.y += (player.y - 150 - e.y) * 0.02;
+                        if (Math.random() < 0.2) spawnBulletEnemy(e.x, e.y, angleToPlayer + (Math.random()-0.5)*0.5, 5, '#e67e22', 4, 10, {pierce: true});
+                    } else if (e.timer < 4) { e.x += Math.cos(angleToPlayer)*10; e.y += Math.sin(angleToPlayer)*10; }
+                    else { e.timer = 0; }
+                } else if (e.type === 'catastrophe') {
+                    e.timer += deltaTime; e.x += Math.cos(e.timer)*3; e.y += Math.sin(e.timer*2)*3;
+                    if (e.timer > 2) { spawnBulletEnemy(e.x, e.y, angleToPlayer, 4, '#d35400', 6, 15, {bounce: true}); e.timer = 0; }
+                }
+
+                // 적 피격 판정
+                for (let bi = bullets.length - 1; bi >= 0; bi--) {
+                    let b = bullets[bi];
+                    if (b.fromPlayer && Math.hypot(e.x - b.x, e.y - b.y) < e.radius + b.radius) {
+                        if (e.type === 'calamitas' && e.invincible) { }
+                        else {
+                            let dmg = b.damage;
+                            if (e.type === 'calamitas' && isHardMode) dmg *= 1.5; 
+                            e.hp -= dmg;
+                            if (e.hp <= 0) {
+                                score += (e.type === 'calamitas' ? 1500 : (e.type==='melee'?30:(e.type==='ranged'?70:300)));
+                                enemies.splice(ei, 1);
+                                if (e.type === 'calamitas') bossSpawned = false; 
+                                document.getElementById('score').innerText = score;
+                                checkLevelUp();
+                            }
+                        }
+                        bullets.splice(bi, 1);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        draw();
+        requestAnimationFrame(update);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 조이스틱 UI 그리기
+        if (isTouching) {
+            ctx.beginPath(); ctx.arc(joyBaseX, joyBaseY, 40, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'; ctx.stroke();
+            
+            let dx = touchX - joyBaseX;
+            let dy = touchY - joyBaseY;
+            let dist = Math.hypot(dx, dy);
+            if (dist > 40) { dx = (dx/dist)*40; dy = (dy/dist)*40; }
+            
+            ctx.beginPath(); ctx.arc(joyBaseX + dx, joyBaseY + dy, 15, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'; ctx.fill();
+        }
+
+        if (player.iFrames <= 0 || Math.floor(Date.now() / 100) % 2 === 0) {
+            ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
+            ctx.fillStyle = player.color; ctx.fill();
+            ctx.beginPath(); ctx.arc(player.x, player.y, player.hitbox, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fill();
+        }
+
+        bullets.forEach(b => {
+            ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
+            ctx.fillStyle = b.color; ctx.fill();
+        });
+
+        enemies.forEach(e => {
+            ctx.globalAlpha = (e.type === 'calamitas' && e.invincible) ? 0.3 : 1.0;
+            ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, Math.PI*2); ctx.fillStyle = e.color; ctx.fill();
+            
+            if (e.type === 'calamitas' || e.type === 'cataclysm' || e.type === 'catastrophe') {
+                ctx.beginPath(); ctx.arc(e.x, e.y, e.radius * 0.4, 0, Math.PI*2); ctx.fillStyle = '#f1c40f'; ctx.fill();
+                ctx.beginPath(); ctx.arc(e.x, e.y, e.radius * 0.15, 0, Math.PI*2); ctx.fillStyle = '#000'; ctx.fill();
+            }
+
+            ctx.globalAlpha = 1.0;
+            ctx.fillStyle = 'red'; ctx.fillRect(e.x - e.radius, e.y - e.radius - 8, (e.radius*2) * (e.hp/e.maxHp), 3);
+        });
+    }
+
+    function endGame() {
+        isGameOver = true;
+        alert(`GAME OVER!\n최종 점수: ${score}`);
+        location.reload();
+    }
+</script>
+</body>
+</html>
