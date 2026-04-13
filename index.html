@@ -132,7 +132,7 @@
         <div style="margin-top: 15px;">
             <label style="font-size:18px; cursor:pointer; color:#bdc3c7;"><input type="checkbox" id="mobile-toggle" style="transform: scale(1.5); margin-right: 10px;">모바일 조작 UI 강제 켜기</label>
         </div>
-        <p style="color: #888; margin-top: 20px; font-size: 14px;">[WASD]: 이동 | [Mouse]: 사격 | [Space]: 대시 | [E]: 자동발사 | [P]: 일시정지 | [2]: 2배속</p>
+        <p style="color: #888; margin-top: 20px; font-size: 14px;">[WASD]: 이동 | [Mouse]: 사격 | [Space]: 대시 | [E]: 자동발사 | [P]: 일시정지 | [2]: 2배속 | [T]: 테스트메뉴</p>
     </div>
 
     <div id="subweapon-screen">
@@ -319,7 +319,6 @@
     }
     document.getElementById('pause-btn').onclick = togglePause;
     
-    // 💡 시작 전 보조무기 화면 연결
     function startGame(hard, revive, test) {
         if(audioCtx.state === 'suspended') audioCtx.resume();
         pendingMode = { hard, revive, test };
@@ -333,7 +332,7 @@
 
     function selectSubWeapon(weaponId) {
         document.getElementById('subweapon-screen').style.display = 'none';
-        player.skills[weaponId] = 1; // 선택한 무기 1레벨 부여
+        player.skills[weaponId] = 1; 
         startGameBase(false);
     }
 
@@ -376,6 +375,7 @@
         }
     }
 
+    // 💡 최대 체력 진화 텍스트 리워크 적용 완료
     const skillDict = {
         bounce: { icon: '🪃', name: '스마트 도탄', evName: '차원 도탄 (무한 반사, 딜 50%↓)', evName7: '절대 도탄 (과부하 페널티 면역)' },
         multishot: { icon: '🔫', name: '멀티샷', evName: '탄막 융합 (발사량 2배, 집탄률↓)' },
@@ -386,7 +386,7 @@
         homing: { icon: '🎯', name: '유도탄', evName: '점근선 유도 (초정밀 유도)' },
         size: { icon: '🌕', name: '거대 총알', evName: '초신성 (압도적 크기, 탄속 50%↓)' },
         crit: { icon: '⚔️', name: '치명타', evName: '필살의 일격 (확률50% + 5%로 50배 초치명타)' },
-        maxHp: { icon: '❤️', name: '체력 단련', evName: '거인의 심장' },
+        maxHp: { icon: '❤️', name: '체력 단련', evName: '거인의 심장 (최대체력 1.5배+100 증가 & 즉시 풀피)' },
         regen: { icon: '🌱', name: '자연 치유', evName: '불사조의 피 (딸피일수록 회복폭주)' },
         dashBoost: { icon: '🔥', name: '화염 질주', evName: '지옥불 질주 (폭발 생성)' },
         orbital: { icon: '🪐', name: '오비탈 쉴드', evName: '성운의 고리 (개수/속도 2배)' },
@@ -430,7 +430,6 @@
         { id: 'dashCooldown', icon: '💨', name: '가벼운 발걸음', desc: '대시 쿨타임 대폭 감소.' }
     ];
 
-    // 💡 2^N 스케일링으로 변경
     function checkLevelUp() {
         while (score >= nextLevelScore) {
             levelCount++;
@@ -485,7 +484,6 @@
             let isMaxEvo = ab.id === 'bounce' && player.skills[ab.id] >= 6;
            
             card.className = `card animating ${isEvolution ? 'card-evolve' : ''}`;
-           
             card.style.animationDelay = (index * 0.05) + 's';
            
             let titleText = ab.name;
@@ -497,12 +495,23 @@
             card.onclick = () => {
                 if (isCardAnimating || card.classList.contains('picked')) return;
                 playSound(800, 'square', 0.1, 0.1);
+                
+                // 💡 최대 체력 진화 변경 로직 반영
                 if (ab.id === 'heal') {
                     player.hp = Math.min(player.maxHp, player.hp + 40);
                     createParticles(player.x, player.y, '#2ecc71', 20);
                 }
-                else if (ab.id === 'maxHp') { player.maxHp += 20;
-                    player.hp += 20; player.skills.maxHp++; }
+                else if (ab.id === 'maxHp') { 
+                    player.skills.maxHp++; 
+                    if (player.skills.maxHp === 5) {
+                        player.maxHp = Math.floor(player.maxHp * 1.5) + 100;
+                        player.hp = player.maxHp;
+                        showDialogue(`거인의 심장 각성!`, 3000);
+                    } else {
+                        player.maxHp += 25;
+                        player.hp += 25; 
+                    }
+                }
                 else {
                     player.skills[ab.id]++;
                     if(player.skills[ab.id] === 5) showDialogue(`${ab.name} 스킬 진화!`, 2000);
@@ -527,6 +536,11 @@
         if (e.code === 'Space' && dashCooldown <= 0 && gameActive && !isPaused && !isManualPaused && player.debuffs.extremeGravity <= 0) triggerDash();
         if (e.code === 'KeyE' && gameActive) toggleAutoFire();
         if (e.code === 'Digit2' && gameActive) { toggleSpeed(); }
+        // 💡 테스트 모드 단축키 T
+        if (e.code === 'KeyT' && gameActive) { 
+            isTestMode = !isTestMode; 
+            document.getElementById('test-ui').style.display = isTestMode ? 'flex' : 'none'; 
+        }
     });
     
     window.addEventListener('keyup', e => keys[e.code] = false);
@@ -694,7 +708,6 @@
     }
 
     function spawnBulletEnemy(x, y, angle, speed, color, radius, damage, props = {}) {
-        // 발악 패턴 렉/프리징 완벽 차단. 최대 개수 초과시 오래된 투사체 삭제
         if (bullets.length > 800) {
             let oldestIdx = bullets.findIndex(b => !b.fromPlayer);
             if(oldestIdx !== -1) bullets.splice(oldestIdx, 1);
@@ -750,11 +763,17 @@
 
         if (!bossSpawned) {
             gameTime += deltaTime;
-            // 💡 시간에 비례해 적이 2^N배 강해짐 (극강의 스노우볼링)
             let minutes = Math.floor(gameTime / 60);
             difficultyLevel = (1 + (gameTime / 60) * 0.5) * Math.pow(2, minutes);
         }
         
+        // 💡 120초 등 정해진 시간에 도달하면 보스가 나타나도록 추가. 
+        // gameTime이 증가할 때마다 체크함
+        if (gameTime >= 120 && !flags.calSpawned) { flags.calSpawned = true; spawnBoss('calamitas'); }
+        if (gameTime >= 240 && !flags.dogSpawned) { flags.dogSpawned = true; spawnBoss('dog'); }
+        if (gameTime >= 360 && !flags.tasSpawned) { flags.tasSpawned = true; spawnBoss('tasmanian'); }
+        if (gameTime >= 480 && !flags.normanSpawned) { flags.normanSpawned = true; spawnBoss('norman'); }
+
         document.getElementById('timer').innerText = `${String(Math.floor(gameTime/60)).padStart(2,'0')}:${String(Math.floor(gameTime%60)).padStart(2,'0')}`;
        
         if (autoFire) { let t = getSmartNearestEnemy(player.x, player.y, [], true);
@@ -807,25 +826,32 @@
             if (dashTime <= 0) isDashing = false;
         }
 
-        // 💡 광선검 버프 로직 (범위 2.5배 증가, 쿨타임 2배)
+        // 💡 광선검 너프 및 멀티샷 회전 수 증가 로직 추가
         if (player.skills.sword > 0) {
             player.swordTimer = (player.swordTimer || 0) + deltaTime;
-            let swordCooldown = Math.max(0.5, (2.5 - (player.skills.firerate * 0.2) - (player.skills.sword * 0.2)) * 1.5);
+            // 쿨타임 증가
+            let swordCooldown = Math.max(1.0, (3.5 - (player.skills.firerate * 0.2) - (player.skills.sword * 0.2)));
             if (player.swordTimer >= swordCooldown) {
                 player.swordTimer = 0;
-                let sDamage = (150 + player.skills.damage * 40) * player.skills.sword * pDmgMultiplier;
-                let sRange = (120 + player.skills.size * 20) * 2.5;
-                if(player.skills.sword >= 5) { sDamage *= 2; sRange *= 1.5; }
+                // 기본 대미지 너프
+                let sDamage = (80 + player.skills.damage * 20) * player.skills.sword * pDmgMultiplier;
+                // 기본 사거리 너프
+                let sRange = (80 + player.skills.size * 15);
+                if(player.skills.sword >= 5) { sDamage *= 1.5; sRange *= 1.3; }
+                
+                // 멀티샷 비례 잔존 시간(회전수) 증가
+                let swings = 1 + player.skills.multishot;
+                let sLifeTime = 200 + (swings * 150);
+                
                 bullets.push({
                     x: player.x, y: player.y, radius: sRange, color: 'rgba(241, 196, 15, 0.4)', fromPlayer: true,
-                    damage: sDamage, baseSpeed: 0, stationary: true, spawnTime: Date.now(), lifeTime: 300,
-                    bounceLeft: 0, pierceLeft: 999, hitEnemies: [], isSword: true
+                    damage: sDamage, baseSpeed: 0, stationary: true, spawnTime: Date.now(), lifeTime: sLifeTime,
+                    bounceLeft: 0, pierceLeft: 999, hitEnemies: [], isSword: true, swings: swings
                 });
                 playSound(300, 'sawtooth', 0.2, 0.1);
             }
         }
        
-        // 💡 타즈메니아 펫: 이제 적에게 직접 돌진함
         if (player.skills.pet > 0) {
             let target = getSmartNearestEnemy(myPet.x, myPet.y);
             let petSpeed = (10 + player.skills.speed * 2) * (player.skills.pet >= 5 ? 2.5 : 1);
@@ -1403,7 +1429,10 @@
 
         bullets.forEach(b => {
             if (b.isSword) {
-                ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(gameTime * 15);
+                ctx.save(); ctx.translate(b.x, b.y); 
+                // 멀티샷 회전 수 증가 로직
+                let rotSpeed = 10 + (b.swings * 5);
+                ctx.rotate(gameTime * rotSpeed);
                 ctx.fillStyle = b.color; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0, b.radius, -Math.PI/2, Math.PI/2); ctx.fill();
                 ctx.restore();
             } else {
