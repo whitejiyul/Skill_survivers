@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>스킬 서바이버 - 극한 스노우볼링 & 보스 픽스</title>
+    <title>스킬 서바이버 - 얼티밋 퓨어 오프라인</title>
     <style>
         body { background-color: #050505; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: white; font-family: 'Malgun Gothic', sans-serif; overflow: hidden; user-select: none; touch-action: none; }
         
@@ -13,12 +13,11 @@
             box-shadow: 0 0 50px rgba(52, 152, 219, 0.2); 
         }
 
-        #start-screen { position: absolute; display: flex; flex-direction: column; align-items: center; z-index: 20; height: 100vh; overflow-y: auto; padding: 20px 0; width: 100%; background: rgba(5,5,5,0.95); }
-        #start-screen h1 { font-size: 65px; color: #f1c40f; text-shadow: 0 0 40px rgba(241,196,15,0.8); margin-bottom: 10px; letter-spacing: 5px; text-align: center; }
+        #start-screen { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; height: 100vh; width: 100%; background: #050505; }
+        #start-screen h1 { font-size: 65px; color: #f1c40f; text-shadow: 0 0 40px rgba(241,196,15,0.8); margin-bottom: 20px; letter-spacing: 5px; text-align: center;}
         #start-screen h3 { color: #3498db; margin-bottom: 30px; letter-spacing: 2px; }
         
         .diff-btn { width: 280px; padding: 15px; margin: 8px; font-size: 20px; font-weight: bold; cursor: pointer; border: none; border-radius: 10px; transition: 0.3s; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        #continue-btn { background: linear-gradient(135deg, #f1c40f, #f39c12); display: none; color: #111; animation: pulse 2s infinite; }
         #normal-btn { background: linear-gradient(135deg, #27ae60, #2ecc71); }
         #hard-btn { background: linear-gradient(135deg, #8e44ad, #9b59b6); }
         #test-btn { background: linear-gradient(135deg, #34495e, #2c3e50); }
@@ -29,20 +28,12 @@
         .checkbox-group input { transform: scale(1.5); margin-right: 15px; }
 
         #subweapon-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 80; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        #subweapon-screen h1 { font-size: 50px; color: #f1c40f; margin-bottom: 40px; text-shadow: 0 0 20px rgba(241,196,15,0.8); text-align: center;}
+        #subweapon-screen h1 { font-size: 50px; color: #f1c40f; margin-bottom: 40px; text-shadow: 0 0 20px rgba(241,196,15,0.8); }
         .sub-btn-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
         .sub-btn { padding: 30px 20px; font-size: 22px; font-weight: bold; cursor: pointer; background: linear-gradient(145deg, #1e2a38, #111a22); color: #fff; border: 3px solid #3498db; border-radius: 15px; transition: 0.3s; display: flex; flex-direction: column; align-items: center; width: 240px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .sub-btn:hover { transform: scale(1.05) translateY(-10px); border-color: #f1c40f; box-shadow: 0 0 30px rgba(241,196,15,0.6); }
         .sub-icon { font-size: 60px; margin-bottom: 15px; }
         .sub-desc { font-size: 13px; color: #bdc3c7; margin-top: 15px; line-height: 1.4; text-align: center; word-break: keep-all; }
-
-        #leaderboard { margin-top: 25px; background: rgba(10, 14, 20, 0.9); padding: 20px 30px; border-radius: 15px; border: 2px solid #f1c40f; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        #leaderboard h2 { margin: 0 0 15px 0; color: #f1c40f; font-size: 22px; text-align: center; text-shadow: 0 2px 4px #000; }
-        .lb-entry { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
-        .lb-entry:nth-child(1) { color: #ffd700; font-weight: bold; font-size: 18px; text-shadow: 0 0 10px rgba(255,215,0,0.5); } 
-        .lb-entry:nth-child(2) { color: #c0c0c0; font-weight: bold; font-size: 17px; } 
-        .lb-entry:nth-child(3) { color: #cd7f32; font-weight: bold; } 
-        .lb-empty { text-align: center; color: #777; font-size: 14px; margin-top: 10px; }
 
         #hud { position: absolute; top: 40px; width: 1200px; max-width: 95vw; display: none; justify-content: space-between; padding: 0 20px; box-sizing: border-box; pointer-events: none; z-index: 5; }
         .stat-box { background: rgba(0,0,0,0.8); padding: 8px 20px; border-radius: 8px; border-left: 4px solid #f1c40f; font-weight: bold; font-size: 18px; color: #ecf0f1; transition: 0.3s; }
@@ -61,32 +52,21 @@
         #skill-panel { position: absolute; left: 50%; transform: translateX(-50%); bottom: 5px; background: rgba(10,10,10,0.7); padding: 2px 10px; border-radius: 8px; z-index: 6; pointer-events: none; display: none; max-width: 90vw; text-align: center; font-size: 9px; }
         #skill-panel ul { list-style: none; padding: 0; margin: 0; font-size: 9px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; color: #ddd; }
         .evolved-text { color: #f39c12; font-weight: bold; text-shadow: 0 0 3px #f39c12; }
-        .max-evolved-text { color: #ff00ff; font-weight: bold; text-shadow: 0 0 5px #ff00ff; }
+        .max-evolved-text { color: #ff00ff; font-weight: bold; text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff; font-size: 14px; }
 
         #level-up-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.92); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 55; }
         #cards-container { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-width: 300px; }
         
         @keyframes popIn { 0% { opacity: 0; transform: translateY(20px) scale(0.9); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-
-        .card { 
-            position: relative; width: 220px; height: 60px; border-radius: 8px; 
-            cursor: pointer; opacity: 0; animation: popIn 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
-            background: linear-gradient(145deg, #1e2a38, #111a22); border: 1px solid #333;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.6); transition: transform 0.2s;
-            display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 5px 15px; box-sizing: border-box;
-        }
+        .card { position: relative; width: 220px; height: 60px; border-radius: 8px; cursor: pointer; opacity: 0; animation: popIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; background: linear-gradient(145deg, #1e2a38, #111a22); border: 1px solid #333; box-shadow: 0 5px 10px rgba(0,0,0,0.6); transition: transform 0.2s; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; padding: 5px 15px; box-sizing: border-box; }
         .card:hover { transform: scale(1.05); border-color: #f1c40f; }
         .card.picked { opacity: 0.3 !important; transform: scale(0.95); filter: grayscale(100%); pointer-events: none; }
         .card-icon { font-size: 24px; margin-right: 15px; }
         .card-title { margin: 0; color: #fff; font-size: 12px; text-align: left; line-height: 1.2; }
         .card-desc { font-size: 10px; color: #bdc3c7; margin-top: 3px; display: block; }
         
-        @keyframes evolvePulse {
-            from { box-shadow: 0 0 10px rgba(255, 50, 0, 0.6); border-color: #e67e22; }
-            to { box-shadow: 0 0 25px rgba(241, 196, 15, 1); border-color: #f1c40f; }
-        }
+        @keyframes evolvePulse { from { box-shadow: 0 0 10px rgba(255, 50, 0, 0.6); border-color: #e67e22; } to { box-shadow: 0 0 25px rgba(241, 196, 15, 1); border-color: #f1c40f; } }
         .card-evolve { border-color: #ff3300 !important; background: linear-gradient(145deg, #4a0000, #220000) !important; animation: popIn 0.4s forwards, evolvePulse 0.8s infinite alternate !important; }
-        .max-evolved-text { color: #ff00ff; font-weight: bold; text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff; font-size: 14px; }
 
         #dialogue { position: absolute; bottom: 15%; font-size: 30px; font-weight: bold; color: #e74c3c; font-style: italic; text-shadow: 0 0 10px #000; display: none; z-index: 15; text-align: center; }
         #debuff-ui { position: absolute; top: 80px; right: 20px; font-size: 16px; font-weight: bold; color: #e74c3c; display: none; z-index: 10; text-align: right; text-shadow: 0 0 10px #000; }
@@ -101,16 +81,14 @@
 
         #test-ui { position: absolute; top: 10px; left: 10px; display: none; z-index: 100; flex-direction: column; gap: 5px; }
         #test-ui button { background: rgba(0,0,0,0.8); color: white; border: 1px solid #3498db; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        #test-ui button:hover { background: #3498db; }
     </style>
 </head>
 <body>
 
     <div id="start-screen">
         <h1>SKILL SURVIVOR</h1>
-        <h3>오프라인 리마스터 에디션</h3>
+        <h3>PURE OFFLINE EDITION</h3>
         
-        <button id="continue-btn" class="diff-btn" onclick="loadGame()">이어하기 (세이브 존재)</button>
         <button id="normal-btn" class="diff-btn" onclick="startGame(false, false)">일반 모드 시작</button>
         <button id="hard-btn" class="diff-btn" onclick="startGame(true, false)">하드 모드 시작</button>
         <button id="test-btn" class="diff-btn" style="font-size: 16px; padding: 10px;" onclick="startGame(false, true)">테스트 모드</button>
@@ -119,12 +97,7 @@
             <label><input type="checkbox" id="revive-toggle"> 무제한 부활 모드 (연습용)</label>
             <label><input type="checkbox" id="mobile-toggle"> 모바일 조작 UI 강제 켜기</label>
         </div>
-
-        <div id="leaderboard">
-            <h2>🏆 로컬 명예의 전당 🏆</h2>
-            <div id="lb-list"></div>
-        </div>
-        <p style="color: #888; margin-top: 20px; font-size: 14px;">[WASD]: 이동 | [Mouse]: 사격 | [Space]: 대시 | [E]: 자동발사 | [P]: 일시정지 | [2]: 2배속</p>
+        <p style="color: #888; margin-top: 30px; font-size: 14px;">[WASD]: 이동 | [Mouse]: 사격 | [Space]: 대시 | [E]: 자동발사 | [P]: 일시정지 | [2]: 2배속</p>
     </div>
 
     <div id="subweapon-screen">
@@ -132,11 +105,11 @@
         <div class="sub-btn-container">
             <button class="sub-btn" onclick="selectSubWeapon('sword')">
                 <span class="sub-icon">🗡️</span>광선검
-                <span class="sub-desc">범위 2.5배 휩쓰는 거대한 검기 생성.<br>(피해량, 크기 영향)</span>
+                <span class="sub-desc">주기적으로 주변을 휩쓰는 거대한 검기를 생성합니다.<br>(범위 고정, 대미지 폭증)</span>
             </button>
             <button class="sub-btn" onclick="selectSubWeapon('pet')">
                 <span class="sub-icon">🐺</span>타즈메니아 펫
-                <span class="sub-desc">가장 가까운 적에게 맹렬하게 돌진 타격.<br>(연사력, 이속 영향)</span>
+                <span class="sub-desc">적에게 맹렬하게 다수 돌진 타격.<br>(성장시 마리수 증가)</span>
             </button>
             <button class="sub-btn" onclick="selectSubWeapon('dashCooldown')">
                 <span class="sub-icon">💨</span>가벼운 발걸음
@@ -146,9 +119,9 @@
     </div>
 
     <div id="test-ui">
-        <button onclick="spawnBoss('calamitas')">소환: 칼라미타스 (2분)</button>
-        <button onclick="spawnBoss('dog')">소환: 신먹자 (4분)</button>
-        <button onclick="spawnBoss('tasmanian')">소환: 늑대 (6분)</button>
+        <button onclick="spawnBoss('calamitas')">소환: 칼라미타스</button>
+        <button onclick="spawnBoss('dog')">소환: 신먹자</button>
+        <button onclick="spawnBoss('tasmanian')">소환: 6분 보스</button>
         <button onclick="availableDraws++; updateDrawBtn();">카드 얻기(+1)</button>
     </div>
 
@@ -161,10 +134,7 @@
         <div class="stat-box">⭐ <span id="score">0</span> <span style="color:#aaa; font-size:14px">/ <span id="next-score">500</span></span></div>
     </div>
 
-    <div id="skill-panel">
-        <ul id="skill-ul"></ul>
-    </div>
-
+    <div id="skill-panel"><ul id="skill-ul"></ul></div>
     <div id="debuff-ui"></div>
     <div id="penalty-ui">과부하 페널티! 대미지 감소 중</div>
     <div id="auto-fire-ind">자동발사 (E): OFF</div>
@@ -180,7 +150,7 @@
     <div id="pause-screen">
         <h2>PAUSED</h2>
         <p style="color:#aaa; font-size:20px; margin-top:10px;">[P]를 눌러 게임 재개</p>
-        <button id="go-main-btn" class="diff-btn" style="background: #e74c3c; width: 250px; font-size: 20px; margin-top: 30px;">메인 화면으로 (저장)</button>
+        <button id="go-main-btn" class="diff-btn" style="background: #e74c3c; width: 250px; font-size: 20px; margin-top: 30px;">메인 화면으로 종료</button>
     </div>
 
     <div id="joystick-base"><div id="joystick-stick"></div></div>
@@ -203,24 +173,6 @@
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
         osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
-
-    // --- 리더보드 로드 ---
-    function loadLeaderboard() {
-        const lbList = document.getElementById('lb-list');
-        if(!lbList) return;
-        const lbData = JSON.parse(localStorage.getItem('skillSurvivorLB_Offline')) || [];
-        lbList.innerHTML = '';
-        
-        if (lbData.length === 0) {
-            lbList.innerHTML = '<div class="lb-empty">아직 기록이 없습니다.<br>첫 번째 랭커가 되어보세요!</div>';
-        } else {
-            lbData.forEach((entry, index) => {
-                let rankIcon = (index === 0) ? '🥇 ' : (index === 1) ? '🥈 ' : (index === 2) ? '🥉 ' : `${index + 1}. `;
-                lbList.innerHTML += `<div class="lb-entry"><span>${rankIcon}${entry.name}</span><span>${entry.score.toLocaleString()}점</span></div>`;
-            });
-        }
-    }
-    loadLeaderboard(); 
 
     // --- 게임 핵심 변수 ---
     const canvas = document.getElementById("gameCanvas");
@@ -254,13 +206,14 @@
         debuffs: { distorted: 0, extremeGravity: 0 },
         skills: { bounce: 0, multishot: 0, firerate: 0, speed: 0, damage: 0, pierce: 0, homing: 0, size: 0, crit: 0, maxHp: 0, regen: 0, dashBoost: 0, orbital: 0, sword: 0, pet: 0, dashCooldown: 0 }
     };
-    let myPet = { x: 600, y: 400, timer: 0 };
-
+    
+    let myPets = [];
     let bullets = [], enemies = [], laserWarnings = [];
     const keys = {};
 
     let flags = { calSpawned: false, dogSpawned: false, tasSpawned: false };
 
+    // 💡 모든 변수를 100% 완전 초기화 (오프라인 무결성 보장)
     function resetGameState() {
         score = 0; gameTime = 0; lastTimestamp = 0;
         difficultyLevel = 1; levelCount = 0; nextLevelScore = 500;
@@ -280,75 +233,23 @@
         player.debuffs = { distorted: 0, extremeGravity: 0 };
         player.skills = { bounce: 0, multishot: 0, firerate: 0, speed: 0, damage: 0, pierce: 0, homing: 0, size: 0, crit: 0, maxHp: 0, regen: 0, dashBoost: 0, orbital: 0, sword: 0, pet: 0, dashCooldown: 0 };
         
-        myPet = { x: 600, y: 400, timer: 0 };
+        myPets = [];
         
         if (rafId) cancelAnimationFrame(rafId);
         if (spawnTimeoutId) clearTimeout(spawnTimeoutId);
     }
 
-    function checkSaveData() {
-        const saved = localStorage.getItem('skillSurvivorSave_Offline');
-        if(saved) { document.getElementById('continue-btn').style.display = 'block'; } 
-        else { document.getElementById('continue-btn').style.display = 'none'; }
-    }
-    checkSaveData();
-
-    function saveGame() {
-        if (!gameActive || isGameOver) return;
-        const saveData = {
-            score, gameTime, difficultyLevel, levelCount, nextLevelScore,
-            isHardMode, isReviveMode, autoFire, availableDraws, picksRemaining, flags, player
-        };
-        localStorage.setItem('skillSurvivorSave_Offline', JSON.stringify(saveData));
-    }
-
-    function loadGame() {
-        const data = JSON.parse(localStorage.getItem('skillSurvivorSave_Offline'));
-        if(!data) return;
-
-        resetGameState(); 
-
-        score = data.score; gameTime = data.gameTime; difficultyLevel = data.difficultyLevel;
-        levelCount = data.levelCount; nextLevelScore = data.nextLevelScore;
-        isHardMode = data.isHardMode; isReviveMode = data.isReviveMode; 
-        autoFire = data.autoFire; availableDraws = data.availableDraws; picksRemaining = data.picksRemaining;
-        
-        flags = data.flags || { calSpawned: false, dogSpawned: false, tasSpawned: false };
-        flags.calSpawned = gameTime >= 120; flags.dogSpawned = gameTime >= 240; flags.tasSpawned = gameTime >= 360;
-
-        Object.assign(player, data.player);
-        
-        if (isNaN(player.x) || isNaN(player.y)) { player.x = 600; player.y = 400; }
-        if (!player.radius || !player.color) { player.radius = 15; player.color = '#3498db'; }
-        
-        player.iFrames = 2.0; 
-        
-        document.getElementById('subweapon-screen').style.display = 'none';
-        startGameBase(true);
-    }
-    
-    setInterval(() => { if(gameActive && !isPaused && !isManualPaused) saveGame(); }, 5000);
-
     function togglePause() {
         if(!gameActive || isGameOver || document.getElementById('level-up-screen').style.display === 'flex') return;
         isManualPaused = !isManualPaused;
         document.getElementById('pause-screen').style.display = isManualPaused ? 'flex' : 'none';
+        if(!isManualPaused) { lastTimestamp = performance.now(); } // 일시정지 풀릴 때 시간 동기화
     }
     document.getElementById('pause-btn').onclick = togglePause;
 
+    // 💡 메인 화면 종료 기능 (버그 원천 차단을 위해 새로고침 적용)
     document.getElementById('go-main-btn').addEventListener('click', () => {
-        saveGame(); 
-        isManualPaused = false; gameActive = false; 
-
-        document.getElementById('pause-screen').style.display = 'none';
-        document.getElementById('start-screen').style.display = 'flex';
-        
-        ['hud', 'dash-cool', 'auto-fire-ind', 'speed-btn', 'pause-btn'].forEach(id => document.getElementById(id).style.display = 'none');
-        document.getElementById('skill-panel').style.display = 'none';
-        canvas.style.display = 'none';
-        
-        resetGameState(); 
-        checkSaveData();
+        location.reload(); 
     });
 
     function startGame(hard, test) {
@@ -358,7 +259,6 @@
         isHardMode = hard; isTestMode = test;
         isReviveMode = document.getElementById('revive-toggle').checked;
         
-        localStorage.removeItem('skillSurvivorSave_Offline'); 
         document.getElementById('start-screen').style.display = 'none';
         document.getElementById('subweapon-screen').style.display = 'flex';
     }
@@ -366,10 +266,10 @@
     function selectSubWeapon(weaponId) {
         document.getElementById('subweapon-screen').style.display = 'none';
         player.skills[weaponId] = 1; 
-        startGameBase(false);
+        startGameBase();
     }
 
-    function startGameBase(isLoad = false) {
+    function startGameBase() {
         ['hud', 'dash-cool', 'auto-fire-ind', 'speed-btn', 'pause-btn'].forEach(id => document.getElementById(id).style.display = 'flex');
         document.getElementById('skill-panel').style.display = 'block';
         if (isTestMode) document.getElementById('test-ui').style.display = 'flex';
@@ -380,23 +280,15 @@
         }
         
         gameActive = true; 
-
-        if(!isLoad) {
-            availableDraws = 1; document.getElementById('next-score').innerText = nextLevelScore;
-        } else {
-            document.getElementById('hp').innerText = Math.ceil(player.hp);
-            document.getElementById('maxHp').innerText = player.maxHp;
-            document.getElementById('score').innerText = score;
-            document.getElementById('next-score').innerText = nextLevelScore;
-        }
+        availableDraws = 1; document.getElementById('next-score').innerText = nextLevelScore;
         
         updateDrawBtn(); updateSkillUI(); 
         const ind = document.getElementById('auto-fire-ind');
         ind.innerText = `자동발사 (E): ${autoFire ? 'ON' : 'OFF'}`;
         ind.style.borderColor = autoFire ? '#2ecc71' : '#777'; ind.style.color = autoFire ? '#2ecc71' : '#777';
         
+        lastTimestamp = performance.now(); 
         if (rafId) cancelAnimationFrame(rafId);
-        lastTimestamp = 0; 
         rafId = requestAnimationFrame(update);
         
         if (spawnTimeoutId) clearTimeout(spawnTimeoutId);
@@ -424,22 +316,23 @@
         }
     }
 
+    // 💡 초치명타 스킬 설명 변경
     const skillDict = {
         bounce: { icon: '🪃', name: '스마트 도탄', evName: '차원 도탄 (무한 반사, 딜 50%↓)', evName7: '절대 도탄 (과부하 페널티 면역)' }, 
         multishot: { icon: '🔫', name: '멀티샷', evName: '탄막 융합 (발사량 증가, 집탄률↓)' },
         firerate: { icon: '⚡', name: '신속 사격', evName: '광속 사격 (쿨타임 극감, 딜 50%↓)' }, 
         speed: { icon: '👟', name: '기동성 향상', evName: '위상 이동 (잔상 딜, 방어력↓)' },
-        damage: { icon: '💥', name: '파괴력', evName: '파멸 (크리확률↑/거대화, 쿨타임 증가)' }, 
+        damage: { icon: '💥', name: '파괴력', evName: '파멸 (크리확률↑/거대화, 쿨타임 2배)' }, 
         pierce: { icon: '🏹', name: '관통 사격', evName: '유령 관통 (초고도 관통)' },
         homing: { icon: '🎯', name: '유도탄', evName: '점근선 유도 (초정밀 유도)' }, 
         size: { icon: '🌕', name: '거대 총알', evName: '초신성 (압도적 크기, 탄속 50%↓)' },
-        crit: { icon: '⚔️', name: '치명타', evName: '필살의 일격 (확률급증 + 초치명타 가능)' }, 
+        crit: { icon: '⚔️', name: '치명타', evName: '초치명타 (극악의 확률로 50배 이상 대미지)' }, 
         maxHp: { icon: '❤️', name: '체력 단련', evName: '거인의 심장' },
         regen: { icon: '🌱', name: '자연 치유', evName: '불사조의 피 (딸피일수록 회복폭주)' }, 
         dashBoost: { icon: '🔥', name: '화염 질주', evName: '지옥불 질주 (폭발 생성)' }, 
-        orbital: { icon: '🪐', name: '오비탈 쉴드', evName: '성운의 고리 (개수/속도 2배)' },
+        orbital: { icon: '🪐', name: '오비탈 쉴드', evName: '성운의 고리 (개수/대미지 증가, 멀리 회전)' },
         sword: { icon: '🗡️', name: '광선검', evName: '엑스칼리버 (거대검 투기 발산)' },
-        pet: { icon: '🐺', name: '타즈메니아 펫', evName: '펜리르 (연사력/데미지 극대화)' },
+        pet: { icon: '🐺', name: '타즈메니아 펫', evName: '펜리르 (다수 소환, 연사력 극대화)' },
         dashCooldown: { icon: '💨', name: '가벼운 발걸음', evName: '축지법 (쿨타임 거의 없음)' }
     };
 
@@ -478,7 +371,6 @@
         { id: 'dashCooldown', icon: '💨', name: '가벼운 발걸음', desc: '대시 쿨 대폭감소.' }
     ];
 
-    // 💡 레벨업 요구치: 지수 함수 기반
     function checkLevelUp() {
         while (score >= nextLevelScore) {
             levelCount++; 
@@ -508,7 +400,6 @@
         let weightedPool = [];
         abilityPool.forEach(ab => {
             let level = player.skills[ab.id] || 0;
-            // 💡 무한 업그레이드를 위한 확률 보정 (레벨이 올라도 최소 5 가중치는 유지)
             let weight = Math.max(5, 100 - (level * 15));
             if(ab.id === 'heal') weight = 50; 
             for(let i=0; i<weight; i++) weightedPool.push(ab);
@@ -546,7 +437,6 @@
                     createParticles(player.x, player.y, '#2ecc71', 20); 
                 }
                 else if (ab.id === 'maxHp') { 
-                    // 💡 지수 함수 체력 증가 (기존 단조 증가에서 개선)
                     let inc = Math.floor(20 * Math.pow(1.3, player.skills.maxHp));
                     player.maxHp += inc; player.hp += inc; player.skills.maxHp++; 
                 }
@@ -561,6 +451,7 @@
                 else {
                     document.getElementById('level-up-screen').style.display = 'none';
                     isPaused = false; 
+                    lastTimestamp = performance.now(); // 일시정지 해제 시간 동기화
                 }
             };
             container.appendChild(card);
@@ -608,11 +499,10 @@
     function triggerDash() {
         if (dashCooldown <= 0 && player.debuffs.extremeGravity <= 0) {
             playSound(300, 'triangle', 0.2, 0.2); 
-            isDashing = true; dashTime = 0.2 + (player.skills.dashBoost * 0.05); 
-            // 💡 쿨타임도 지수 감소 적용
-            let baseDashCool = 1.5 * Math.pow(0.7, player.skills.dashCooldown + player.skills.dashBoost); 
+            isDashing = true; dashTime = 0.2 + ((player.skills.dashBoost || 0) * 0.05); 
+            let baseDashCool = 1.5 * Math.pow(0.7, (player.skills.dashCooldown || 0) + (player.skills.dashBoost || 0)); 
             dashCooldown = Math.max(0.1, baseDashCool); 
-            player.iFrames = 0.3 + (player.skills.dashBoost * 0.1); 
+            player.iFrames = 0.3 + ((player.skills.dashBoost || 0) * 0.1); 
         }
     }
     document.getElementById('auto-fire-ind').addEventListener('pointerdown', (e) => { e.preventDefault(); toggleAutoFire(); });
@@ -621,17 +511,18 @@
 
     function playerFire(angle, isAuto, isPet = false, fireSource = player) {
         const now = Date.now();
-        let curFRLevel = player.skills.firerate;
+        let curFRLevel = player.skills.firerate || 0;
         
-        // 💡 모든 스킬 기하급수적 폭증 적용 (Math.pow 활용)
         let baseRate = Math.max(10, 350 * Math.pow(0.75, curFRLevel)); 
-        let currentDamage = 25 * Math.pow(1.5, player.skills.damage); 
-        let baseRadius = 5 * Math.pow(1.25, player.skills.size);
+        let currentDamage = 25 * Math.pow(1.5, player.skills.damage || 0); 
+        let baseRadius = 5 * Math.pow(1.25, player.skills.size || 0);
         let baseSpeed = 12 * Math.pow(1.1, curFRLevel); 
-        let spreadMult = Math.max(0.05, 0.15 * Math.pow(0.9, player.skills.multishot)); 
+        let spreadMult = Math.max(0.05, 0.15 * Math.pow(0.9, player.skills.multishot || 0)); 
         
-        let totalShots = 1 + Math.floor(player.skills.multishot * Math.pow(1.2, player.skills.multishot));
+        let totalShots = 1 + Math.floor((player.skills.multishot || 0) * Math.pow(1.2, player.skills.multishot || 0));
 
+        // 파괴력 진화 시 공속 2배 감소 적용
+        if (player.skills.damage >= 5) { baseRate *= 2; baseRadius *= 2; }
         if (curFRLevel >= 5) currentDamage *= 0.5; 
         if (player.skills.bounce >= 5 && player.skills.bounce < 7) currentDamage *= 0.5; 
         if (player.skills.size >= 5) baseSpeed *= 0.5;
@@ -646,10 +537,17 @@
             }
         }
 
-        let bounceCount = Math.floor(player.skills.bounce * Math.pow(1.5, player.skills.bounce));
-        let pierceCount = Math.floor(player.skills.pierce * Math.pow(1.5, player.skills.pierce));
-        let homingPower = player.skills.homing * Math.pow(1.3, player.skills.homing);
-        let critChance = Math.min(1.0, player.skills.crit * 0.1 * Math.pow(1.2, player.skills.crit)); 
+        let bounceCount = Math.floor((player.skills.bounce || 0) * Math.pow(1.5, player.skills.bounce || 0));
+        let pierceCount = Math.floor((player.skills.pierce || 0) * Math.pow(1.5, player.skills.pierce || 0));
+        let homingPower = (player.skills.homing || 0) * Math.pow(1.3, player.skills.homing || 0);
+        
+        // 💡 초치명타 확률 계산
+        let critChance = 0;
+        if (player.skills.crit >= 5) {
+            critChance = Math.min(1.0, 0.05 + (player.skills.crit - 5) * 0.01);
+        } else {
+            critChance = Math.min(1.0, (player.skills.crit || 0) * 0.1);
+        }
 
         for (let i = 0; i < totalShots; i++) {
             const spread = totalShots > 1 ? (i - (totalShots - 1) / 2) * spreadMult : 0;
@@ -698,14 +596,15 @@
         playSound(50, 'sawtooth', 2.0, 0.5); 
         if(is2xSpeed) toggleSpeed(); 
         
-        // 💡 보스 체력 밸런스 조정 (초기 1.5분모 적용 후 스케일링)
+        let bossScale = Math.pow(2, Math.max(0, Math.floor(gameTime / 60))); 
+        
         if (type === 'calamitas') {
             showDialogue("거대한 기운이 다가옵니다...", 3000);
-            let hp = (25000 / 1.5) * difficultyLevel;
+            let hp = (25000 / 1.5) * bossScale * (isHardMode ? 1.5 : 1);
             enemies.push({ x: canvas.width/2, y: -50, radius: 45, type: 'calamitas', hp: hp, maxHp: hp, color: '#c0392b', hitFlash: 0, state: 'phase1_hover', timer: 0, flags: { bh1: false, bh2: false, bros: false }, angleOffset: 0, invincible: false, targetedBy: 0 });
         } else if (type === 'dog') {
             showDialogue("신조차 집어삼키는 자가 도래합니다... [신들의 포식자]", 4000);
-            let hp = (50000 / 1.5) * difficultyLevel; 
+            let hp = (50000 / 1.5) * bossScale * (isHardMode ? 1.5 : 1); 
             let dog = {
                 x: canvas.width/2, y: -500, radius: 40, type: 'dog', hp: hp, maxHp: hp, color: '#00ffff', hitFlash: 0, 
                 state: 'telegraph', timer: 0, phase: 1, history: [], segments: 15, speedMult: 1.0, 
@@ -715,7 +614,7 @@
             enemies.push(dog);
         } else if (type === 'tasmanian') {
             showDialogue("타즈메니아 주머니 늑대가 나타났습니다!", 4000);
-            let hp = (75000 / 1.5) * difficultyLevel;
+            let hp = (75000 / 1.5) * bossScale * (isHardMode ? 1.5 : 1);
             enemies.push({ x: canvas.width/2, y: -50, radius: 55, type: 'tasmanian', hp: hp, maxHp: hp, color: '#cd853f', hitFlash: 0, state: 'roar', timer: 0, invincible: false, dashAngle: 0, targetedBy: 0 });
         } 
     }
@@ -746,7 +645,6 @@
 
     function spawnEnemy() {
         if (spawnTimeoutId) clearTimeout(spawnTimeoutId);
-        
         if (isGameOver || !gameActive) return;
         
         if (isPaused || isManualPaused) { 
@@ -756,6 +654,8 @@
 
         if (!bossSpawned) { 
             let type = Math.random() > 0.6 ? 'ranged' : 'melee';
+            let speedFactor = isHardMode ? 1.3 : 1.0;
+
             if (gameTime >= 120 && Math.random() > 0.6) {
                 let pool = ['tanker', 'dasher', 'phantom', 'tornado'];
                 type = pool[Math.floor(Math.random() * pool.length)];
@@ -765,20 +665,24 @@
             }
             
             let x = Math.random() < 0.5 ? -30 : canvas.width + 30; let y = Math.random() * canvas.height;
-            let hp = 52, radius = 12, color = '#fff', baseScore = 50;
+            // 💡 초기 적 체력 밸런스 상향
+            let hp = 100, radius = 12, color = '#fff', baseScore = 50;
             
-            if(type === 'melee') { hp = 75; radius = 15; color = '#2ecc71'; baseScore = 80; }
-            else if(type === 'ranged') { hp = 52; radius = 12; color = '#9b59b6'; baseScore = 60; }
-            else if(type === 'tanker') { hp = 350; radius = 25; color = '#27ae60'; baseScore = 150; }
-            else if(type === 'dasher') { hp = 45; radius = 10; color = '#f1c40f'; baseScore = 70; }
-            else if(type === 'phantom') { hp = 80; radius = 14; color = '#bdc3c7'; baseScore = 120; }
-            else if(type === 'tornado') { hp = 150; radius = 18; color = '#7f8c8d'; baseScore = 150; }
-            else if(type === 'mutant') { hp = 450; radius = 20; color = '#e67e22'; baseScore = 200; }
+            if(type === 'melee') { hp = 150; radius = 15; color = '#2ecc71'; baseScore = 80; }
+            else if(type === 'ranged') { hp = 100; radius = 12; color = '#9b59b6'; baseScore = 60; }
+            else if(type === 'tanker') { hp = 700; radius = 25; color = '#27ae60'; baseScore = 150; }
+            else if(type === 'dasher') { hp = 90; radius = 10; color = '#f1c40f'; baseScore = 70; }
+            else if(type === 'phantom') { hp = 160; radius = 14; color = '#bdc3c7'; baseScore = 120; }
+            else if(type === 'tornado') { hp = 300; radius = 18; color = '#7f8c8d'; baseScore = 150; }
+            else if(type === 'mutant') { hp = 900; radius = 20; color = '#e67e22'; baseScore = 200; }
             
             hp *= difficultyLevel;
-            // 💡 경험치 하드모드 보상 1.5배 및 스케일링 폭증
-            let scoreScaling = Math.max(1, difficultyLevel * (isHardMode ? 1.5 : 1));
-            enemies.push({ x, y, radius, type, hp, maxHp: hp, color, timer: 0, hitFlash: 0, baseScore: Math.floor(baseScore * scoreScaling), targetedBy: 0 });
+            
+            // 💡 경험치 하드모드 보상 및 스케일링 폭증 (1.75배)
+            let periods = Math.max(0, Math.floor(gameTime/60) - 1);
+            let scoreScaling = isHardMode ? 2.0 * Math.pow(1.9, periods) : 1.0 * Math.pow(1.75, periods);
+            
+            enemies.push({ x, y, radius, type, hp, maxHp: hp, color, timer: 0, hitFlash: 0, baseScore: Math.floor(baseScore * scoreScaling), targetedBy: 0, speedFactor });
         }
         
         let spawnRate = Math.max(300, 1500 - (gameTime * 15));
@@ -787,11 +691,13 @@
     }
 
     function addScore(amount) {
+        if(!isFinite(amount)) return;
         score += Math.floor(amount);
         document.getElementById('score').innerText = score; 
         checkLevelUp();
     }
 
+    // 💡 투명화 및 타이머 버그 완전 방어 루프
     function update(timestamp) {
         rafId = requestAnimationFrame(update);
 
@@ -800,26 +706,28 @@
         let rawDelta = (timestamp - lastTimestamp) / 1000;
         lastTimestamp = timestamp;
 
+        // 델타캡 (타이머 고장 원천 방지)
         if (rawDelta > 0.1) rawDelta = 0.1;
-        if (isNaN(rawDelta)) rawDelta = 0.016;
+        if (!isFinite(rawDelta)) rawDelta = 0.016;
 
         if (isGameOver || !gameActive || isPaused || isManualPaused) return;
         
-        if (isNaN(player.x)) player.x = canvas.width / 2;
-        if (isNaN(player.y)) player.y = canvas.height / 2;
+        // 💡 플레이어 좌표 NaN 완전 방어
+        if (!isFinite(player.x)) player.x = canvas.width / 2;
+        if (!isFinite(player.y)) player.y = canvas.height / 2;
 
         let speedMult = (is2xSpeed && !bossSpawned) ? 2.0 : 1.0;
         const deltaTime = rawDelta * speedMult; 
 
         enemies.forEach(e => e.targetedBy = 0);
 
+        // 💡 보스 등장 시 타이머 스탑 기능
         if (!bossSpawned) { 
             gameTime += deltaTime; 
-            // 💡 30초마다 2배씩 거침없이 폭증
-            let periods = Math.floor(gameTime / 30);
-            difficultyLevel = Math.pow(2, periods);
+            // 💡 60초마다 2배씩 거침없이 폭증
+            let minutes = Math.floor(gameTime / 60);
+            difficultyLevel = Math.pow(2, minutes);
             
-            // 💡 120초 칼라미타스, 240초 신먹자, 360초 늑대 소환 복구!
             if (gameTime >= 120 && !flags.calSpawned) { flags.calSpawned = true; spawnBoss('calamitas'); }
             else if (gameTime >= 240 && !flags.dogSpawned) { flags.dogSpawned = true; spawnBoss('dog'); }
             else if (gameTime >= 360 && !flags.tasSpawned) { flags.tasSpawned = true; spawnBoss('tasmanian'); }
@@ -867,9 +775,9 @@
             dashTime -= deltaTime;
             let evSpeed = player.skills.speed >= 5;
             if ((player.skills.dashBoost > 0 || evSpeed) && Math.random() < 0.4) {
-                let dashDmg = 15 * Math.pow(1.6, player.skills.damage + player.skills.dashBoost) * pDmgMultiplier;
+                let dashDmg = 15 * Math.pow(1.6, (player.skills.damage||0) + (player.skills.dashBoost||0)) * pDmgMultiplier;
                 bullets.push({
-                    x: player.x, y: player.y, radius: 10 + player.skills.size*2, color: evSpeed?'#9b59b6':'#e74c3c', 
+                    x: player.x, y: player.y, radius: 10 + (player.skills.size||0)*2, color: evSpeed?'#9b59b6':'#e74c3c', 
                     fromPlayer: true, damage: dashDmg,
                     velocity: {x:0, y:0}, stationary: true, spawnTime: Date.now(), bounceLeft: 0, pierceLeft: 999, hitEnemies: [], lifeTime: 1200
                 });
@@ -877,15 +785,15 @@
             if (dashTime <= 0) isDashing = false;
         }
 
-        // 💡 광선검 위치 동기화 및 쿨다운 지수 적용
+        // 💡 광선검 범위 고정, 대미지 폭증 적용
         if (player.skills.sword > 0) {
             player.swordTimer = (player.swordTimer || 0) + deltaTime;
-            let swordCooldown = Math.max(0.1, 3.0 * Math.pow(0.7, player.skills.firerate + player.skills.sword));
+            let swordCooldown = Math.max(0.1, 3.0 * Math.pow(0.7, (player.skills.firerate||0) + player.skills.sword));
             
             if (player.swordTimer >= swordCooldown) {
                 player.swordTimer = 0;
-                let sDamage = 150 * Math.pow(1.6, player.skills.damage + player.skills.sword) * pDmgMultiplier;
-                let sRange = 120 * Math.pow(1.3, player.skills.size + player.skills.sword); 
+                let sDamage = 150 * Math.pow(1.6, (player.skills.damage||0) + player.skills.sword) * pDmgMultiplier;
+                let sRange = 150; // 범위 고정 무효화 처리
                 bullets.push({
                     x: player.x, y: player.y, radius: sRange, color: 'rgba(241, 196, 15, 0.4)', fromPlayer: true,
                     damage: sDamage, baseSpeed: 0, stationary: true, spawnTime: Date.now(), lifeTime: 300, 
@@ -895,32 +803,39 @@
             }
         }
         
-        // 💡 펫 지수 스케일링 적용
         if (player.skills.pet > 0) {
-            let target = getSmartNearestEnemy(myPet.x, myPet.y);
-            let petSpeed = 10 * Math.pow(1.2, player.skills.speed + player.skills.pet) * speedMult;
-            if (target) {
-                let ang = Math.atan2(target.y - myPet.y, target.x - myPet.x);
-                myPet.x += Math.cos(ang) * petSpeed * deltaTime * 60;
-                myPet.y += Math.sin(ang) * petSpeed * deltaTime * 60;
-                
-                if (Math.hypot(target.x - myPet.x, target.y - myPet.y) < 20 + target.radius) {
-                    let petCooldown = Math.max(0.05, 0.8 * Math.pow(0.7, player.skills.firerate + player.skills.pet));
-                    if (myPet.timer > petCooldown) { 
-                        let petDmg = 50 * Math.pow(1.5, player.skills.damage + player.skills.pet) * pDmgMultiplier;
-                        target.hp -= petDmg;
-                        target.hitFlash = 4;
-                        if(particles.length < 300) createParticles(target.x, target.y, '#e67e22', 10);
-                        if (target.hp <= 0 && !target.isSegment) handleEnemyDeath(target);
-                        myPet.timer = 0;
+            while (myPets.length < player.skills.pet) { myPets.push({ x: player.x, y: player.y, timer: 0 }); }
+            
+            myPets.forEach((pet, idx) => {
+                let target = getSmartNearestEnemy(pet.x, pet.y);
+                let petSpeed = 10 * Math.pow(1.2, player.skills.speed||0) * speedMult;
+                if (target) {
+                    let targetX = target.x + Math.cos((Date.now()/500) + (Math.PI*2/myPets.length)*idx) * (target.radius + 15);
+                    let targetY = target.y + Math.sin((Date.now()/500) + (Math.PI*2/myPets.length)*idx) * (target.radius + 15);
+                    let ang = Math.atan2(targetY - pet.y, targetX - pet.x);
+                    
+                    pet.x += Math.cos(ang) * petSpeed * deltaTime * 60;
+                    pet.y += Math.sin(ang) * petSpeed * deltaTime * 60;
+                    
+                    if (Math.hypot(target.x - pet.x, target.y - pet.y) < 30 + target.radius) {
+                        let petCooldown = Math.max(0.05, 0.8 * Math.pow(0.8, player.skills.firerate||0));
+                        if (pet.timer > petCooldown) { 
+                            let petDmg = 50 * Math.pow(1.5, player.skills.damage||0) * pDmgMultiplier;
+                            target.hp -= petDmg;
+                            target.hitFlash = 4;
+                            if(particles.length < 300) createParticles(target.x, target.y, '#e67e22', 10);
+                            if (target.hp <= 0 && !target.isSegment) handleEnemyDeath(target);
+                            pet.timer = 0;
+                        }
                     }
+                } else {
+                    let px = player.x - 40 * player.lastDirX + Math.cos((Math.PI*2/myPets.length)*idx)*20; 
+                    let py = player.y - 40 * player.lastDirY + Math.sin((Math.PI*2/myPets.length)*idx)*20;
+                    pet.x += (px - pet.x) * 0.05 * speedMult;
+                    pet.y += (py - pet.y) * 0.05 * speedMult;
                 }
-            } else {
-                let px = player.x - 40 * player.lastDirX; let py = player.y - 40 * player.lastDirY;
-                myPet.x += (px - myPet.x) * 0.05 * speedMult;
-                myPet.y += (py - myPet.y) * 0.05 * speedMult;
-            }
-            myPet.timer += deltaTime;
+                pet.timer += deltaTime;
+            });
         }
 
         let dbTxt = "";
@@ -931,7 +846,7 @@
 
         let evSpeed = player.skills.speed >= 5;
         let basePace = 1.3; 
-        let currentSpeed = 4.5 * Math.pow(1.15, player.skills.speed) * (isDashing ? 3 : 1) * basePace * (is2xSpeed && !bossSpawned ? 2.0 : 1.0);
+        let currentSpeed = 4.5 * Math.pow(1.15, player.skills.speed||0) * (isDashing ? 3 : 1) * basePace * (is2xSpeed && !bossSpawned ? 2.0 : 1.0);
         
         if (player.debuffs.distorted > 0) currentSpeed /= 1.5; 
         if (player.iFrames > 0) player.iFrames -= deltaTime;
@@ -957,8 +872,8 @@
             if(actualOrbital > 0) {
                 let evOrb = actualOrbital >= 5;
                 let count = Math.floor(actualOrbital * Math.pow(1.4, actualOrbital)); 
-                let oRadius = 70 * Math.pow(1.1, player.skills.size); 
-                let oSpeed = gameTime * 3 * Math.pow(1.1, actualOrbital);
+                let oRadius = 70 + (actualOrbital * 20); // 멀리서 회전
+                let oSpeed = gameTime * 3; // 회전 속도는 고정
                 for(let i=0; i<count; i++) {
                     let angle = oSpeed + (Math.PI * 2 / count) * i;
                     let ox = player.x + Math.cos(angle) * oRadius;
@@ -967,11 +882,12 @@
                     enemies.forEach(e => {
                         if (Math.hypot(e.x - ox, e.y - oy) < 15 + e.radius) {
                             if (Date.now() - (e.lastOrbitalHit||0) > 400) {
-                                let dmg = 15 * Math.pow(1.5, player.skills.damage) * pDmgMultiplier; 
+                                let dmg = 15 * Math.pow(1.5, actualOrbital) * pDmgMultiplier; 
                                 
-                                let critMult = 2 * Math.pow(1.2, player.skills.crit);
-                                if (Math.random() < player.skills.crit * 0.1) {
-                                    dmg *= critMult; e.hitFlash = 10;
+                                let critChance = player.skills.crit >= 5 ? Math.min(1.0, 0.05 + (player.skills.crit - 5) * 0.01) : Math.min(1.0, (player.skills.crit||0) * 0.1);
+                                if (Math.random() < critChance) {
+                                    if (player.skills.crit >= 5) { dmg *= 50 * Math.pow(1.1, player.skills.crit - 5); e.hitFlash = 10; } 
+                                    else { dmg *= 2; }
                                 }
                                 
                                 e.hp -= dmg; e.lastOrbitalHit = Date.now();
@@ -1018,13 +934,21 @@
         for (let i = bullets.length - 1; i >= 0; i--) {
             let b = bullets[i]; 
             
-            if (b.isSword) { b.x = player.x; b.y = player.y; }
+            if (b.isSword) {
+                b.x = player.x;
+                b.y = player.y;
+            }
 
             if (b.stationary) { 
                 let life = b.lifeTime || 1200;
                 if (Date.now() - b.spawnTime > life) { bullets.splice(i, 1); continue; } 
             } 
-            else { b.x += b.velocity.x; b.y += b.velocity.y; }
+            else { 
+                let speed = Math.hypot(b.velocity.x, b.velocity.y);
+                if(speed > 0.001) {
+                    b.x += b.velocity.x; b.y += b.velocity.y; 
+                }
+            }
             
             if (b.fromPlayer && b.homingLvl > 0 && !b.stationary && !b.isSword) {
                 if (!b.currentTarget || b.currentTarget.dead) {
@@ -1040,8 +964,10 @@
                     b.velocity.x += Math.cos(baseAngle) * turnRate; 
                     b.velocity.y += Math.sin(baseAngle) * turnRate;
                     const speed = Math.hypot(b.velocity.x, b.velocity.y);
-                    b.velocity.x = (b.velocity.x / speed) * b.baseSpeed; 
-                    b.velocity.y = (b.velocity.y / speed) * b.baseSpeed;
+                    if(speed > 0.001) {
+                        b.velocity.x = (b.velocity.x / speed) * b.baseSpeed; 
+                        b.velocity.y = (b.velocity.y / speed) * b.baseSpeed;
+                    }
                 }
             }
             
@@ -1203,29 +1129,29 @@
                 }
             }
             else {
-                if (e.type === 'melee') { e.x += Math.cos(angleToPlayer) * 2.5; e.y += Math.sin(angleToPlayer) * 2.5; }
+                if (e.type === 'melee') { e.x += Math.cos(angleToPlayer) * 2.5 * e.speedFactor; e.y += Math.sin(angleToPlayer) * 2.5 * e.speedFactor; }
                 else if (e.type === 'ranged') { 
-                    e.timer += deltaTime; if (distToPlayer > 300) { e.x += Math.cos(angleToPlayer)*1.5; e.y += Math.sin(angleToPlayer)*1.5; } 
-                    if (e.timer > 3.0) { spawnBulletEnemy(e.x, e.y, angleToPlayer, 3.5, '#9b59b6', 5, 10); e.timer = 0; } 
+                    e.timer += deltaTime; if (distToPlayer > 300) { e.x += Math.cos(angleToPlayer)*1.5 * e.speedFactor; e.y += Math.sin(angleToPlayer)*1.5 * e.speedFactor; } 
+                    if (e.timer > (isHardMode? 2.0 : 3.0)) { spawnBulletEnemy(e.x, e.y, angleToPlayer, 3.5, '#9b59b6', 5, 10); e.timer = 0; } 
                 }
-                else if (e.type === 'tanker') { e.x += Math.cos(angleToPlayer) * 0.8; e.y += Math.sin(angleToPlayer) * 0.8; }
+                else if (e.type === 'tanker') { e.x += Math.cos(angleToPlayer) * 0.8 * e.speedFactor; e.y += Math.sin(angleToPlayer) * 0.8 * e.speedFactor; }
                 else if (e.type === 'dasher') {
                     e.timer += deltaTime; let speed = (e.timer % 3 < 0.5) ? 8 : 1.2;
-                    e.x += Math.cos(angleToPlayer) * speed; e.y += Math.sin(angleToPlayer) * speed;
+                    e.x += Math.cos(angleToPlayer) * speed * e.speedFactor; e.y += Math.sin(angleToPlayer) * speed * e.speedFactor;
                 }
                 else if (e.type === 'phantom') {
-                    e.timer += deltaTime; e.x += Math.cos(angleToPlayer) * 2.2; e.y += Math.sin(angleToPlayer) * 2.2;
+                    e.timer += deltaTime; e.x += Math.cos(angleToPlayer) * 2.2 * e.speedFactor; e.y += Math.sin(angleToPlayer) * 2.2 * e.speedFactor;
                 }
                 else if (e.type === 'tornado') {
-                    e.timer += deltaTime; if (distToPlayer > 250) { e.x += Math.cos(angleToPlayer)*1.2; e.y += Math.sin(angleToPlayer)*1.2; }
-                    if (e.timer > 1.5) { 
+                    e.timer += deltaTime; if (distToPlayer > 250) { e.x += Math.cos(angleToPlayer)*1.2 * e.speedFactor; e.y += Math.sin(angleToPlayer)*1.2 * e.speedFactor; }
+                    if (e.timer > (isHardMode? 1.0 : 1.5)) { 
                         for(let i=0; i<4; i++) spawnBulletEnemy(e.x, e.y, e.timer*3 + (Math.PI/2)*i, 4, '#7f8c8d', 6, 15);
                         e.timer = 0;
                     }
                 }
                 else if (e.type === 'mutant') {
-                    e.timer += deltaTime; e.x += Math.cos(angleToPlayer) * 1.8; e.y += Math.sin(angleToPlayer) * 1.8;
-                    if (e.timer > 2.5) {
+                    e.timer += deltaTime; e.x += Math.cos(angleToPlayer) * 1.8 * e.speedFactor; e.y += Math.sin(angleToPlayer) * 1.8 * e.speedFactor;
+                    if (e.timer > (isHardMode? 1.5 : 2.5)) {
                         for(let i=0; i<3; i++) spawnBulletEnemy(e.x, e.y, angleToPlayer + (i-1)*0.2, 5, '#e67e22', 8, 20);
                         e.timer = 0;
                     }
@@ -1240,13 +1166,19 @@
                     if (!((e.type === 'calamitas'||e.type === 'dog' || e.type === 'tasmanian') && e.invincible)) {
                         let dmg = b.damage * pDmgMultiplier; 
                         
-                        if (Math.random() < b.critChance) {
-                            let critMult = 2 * Math.pow(1.2, player.skills.crit);
-                            if (player.skills.crit >= 5 && Math.random() < 0.1 * Math.pow(1.1, player.skills.crit)) {
-                                critMult *= 10; 
-                                e.hitFlash = 10; 
+                        let critChance = player.skills.crit >= 5 ? Math.min(1.0, 0.05 + (player.skills.crit - 5) * 0.01) : Math.min(1.0, (player.skills.crit||0) * 0.1);
+                        if (Math.random() < critChance) {
+                            if (player.skills.crit >= 5) {
+                                let critMult = 50 * Math.pow(1.1, player.skills.crit - 5); 
+                                // 보스 초치명타 85% 면역 (대미지 2배로 일반 치명타 강등)
+                                if ((e.type === 'calamitas' || e.type === 'dog' || e.type === 'tasmanian') && Math.random() < 0.85) {
+                                    dmg *= 2;
+                                } else {
+                                    dmg *= critMult; e.hitFlash = 10; 
+                                }
+                            } else {
+                                dmg *= (b.isEvolvedDmg ? 5 : 2); 
                             }
-                            dmg *= critMult;
                         }
                         
                         e.hp -= dmg; 
@@ -1274,7 +1206,7 @@
         }
         
         draw(); 
-    }
+    } 
 
     function handleEnemyDeath(e) {
         if(e.dead) return;
@@ -1282,8 +1214,6 @@
 
         let pts = e.baseScore || 50;
         addScore(pts);
-        
-        if(particles.length < 300) createParticles(e.x, e.y, e.color, 20);
         
         if(Date.now() - lastKillSoundTime > 50) {
             playSound(100, 'square', 0.2, 0.1); 
@@ -1295,6 +1225,8 @@
             showDialogue("보스를 파괴했습니다!", 5000); bullets = bullets.filter(bull => bull.fromPlayer); laserWarnings = [];
             shakeTime = 1.0; shakeMagnitude = 20; 
             createParticles(e.x, e.y, e.color, 150); 
+        } else {
+            if(particles.length < 300) createParticles(e.x, e.y, e.color, 15);
         }
     }
 
@@ -1328,13 +1260,15 @@
                 ctx.stroke(); ctx.restore();
             });
 
-            if (player.skills.pet > 0 && myPet) {
-                let px = isNaN(myPet.x) ? player.x : myPet.x;
-                let py = isNaN(myPet.y) ? player.y : myPet.y;
-                ctx.save(); ctx.translate(px, py);
-                ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.fillStyle = '#cd853f'; ctx.fill();
-                ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(-5, -3, 3, 0, Math.PI*2); ctx.arc(5, -3, 3, 0, Math.PI*2); ctx.fill();
-                ctx.restore();
+            if (player.skills.pet > 0 && myPets.length > 0) {
+                myPets.forEach(pet => {
+                    let px = isFinite(pet.x) ? pet.x : player.x;
+                    let py = isFinite(pet.y) ? pet.y : player.y;
+                    ctx.save(); ctx.translate(px, py);
+                    ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.fillStyle = '#cd853f'; ctx.fill();
+                    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(-5, -3, 3, 0, Math.PI*2); ctx.arc(5, -3, 3, 0, Math.PI*2); ctx.fill();
+                    ctx.restore();
+                });
             }
 
             if (player.skills.orbital > 0) {
@@ -1342,7 +1276,7 @@
                 if(actualOrbital > 0) {
                     let evOrb = actualOrbital >= 5;
                     let count = Math.floor(actualOrbital * Math.pow(1.4, actualOrbital)); 
-                    let oRadius = 70 * Math.pow(1.1, player.skills.size); 
+                    let oRadius = 70 * Math.pow(1.1, player.skills.size||0); 
                     let oSpeed = gameTime * 3 * Math.pow(1.1, actualOrbital);
                     for(let i=0; i<count; i++) {
                         let angle = oSpeed + (Math.PI * 2 / count) * i;
@@ -1353,51 +1287,46 @@
             }
 
             bullets.forEach(b => {
+                if (!isFinite(b.x) || !isFinite(b.y)) return; 
+                
                 if (b.isSword) {
                     ctx.save(); ctx.translate(b.x, b.y); 
                     ctx.rotate(gameTime * 3); 
                     
                     ctx.fillStyle = b.color; 
-                    ctx.beginPath(); ctx.arc(0, 0, b.radius, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(0, 0, Math.max(0.1, b.radius), 0, Math.PI*2); ctx.fill();
                     
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'; 
-                    ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0, b.radius, -Math.PI/8, Math.PI/8); ctx.fill();
-                    ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0, b.radius, Math.PI - Math.PI/8, Math.PI + Math.PI/8); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0, Math.max(0.1, b.radius), -Math.PI/8, Math.PI/8); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0, Math.max(0.1, b.radius), Math.PI - Math.PI/8, Math.PI + Math.PI/8); ctx.fill();
                     ctx.restore();
                 } else {
-                    ctx.beginPath(); ctx.arc(b.x, b.y, b.radius * 1.5, 0, Math.PI*2); 
+                    ctx.beginPath(); ctx.arc(b.x, b.y, Math.max(0.1, b.radius * 1.5), 0, Math.PI*2); 
                     ctx.fillStyle = b.fromPlayer ? 'rgba(52, 152, 219, 0.4)' : 'rgba(231, 76, 60, 0.4)'; 
                     if(b.stationary) ctx.fillStyle = b.color === '#9b59b6' ? 'rgba(155, 89, 182, 0.6)' : 'rgba(231, 76, 60, 0.6)';
                     ctx.fill();
-                    ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); ctx.fillStyle = b.color; ctx.fill();
+                    ctx.beginPath(); ctx.arc(b.x, b.y, Math.max(0.1, b.radius), 0, Math.PI*2); ctx.fillStyle = b.color; ctx.fill();
                     
                     if (!b.fromPlayer) { ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke(); }
                 }
             });
 
             particles.forEach(p => {
-                ctx.globalAlpha = Math.max(0, p.life) || 0;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fillStyle = p.color; ctx.fill();
-            });
-            ctx.globalAlpha = 1.0;
-
-            floatingTexts.forEach(ft => {
-                ctx.globalAlpha = Math.max(0, ft.life) || 0; ctx.fillStyle = ft.color;
-                ctx.font = 'bold 18px Malgun Gothic'; ctx.textAlign = 'center';
-                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.globalAlpha = Math.max(0, Math.min(1, p.life)) || 0;
+                ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0.1, p.size), 0, Math.PI*2); ctx.fillStyle = p.color; ctx.fill();
             });
             ctx.globalAlpha = 1.0;
 
             if (player.hp > 0 && (player.iFrames <= 0 || Math.floor(Date.now() / 100) % 2 === 0)) {
-                let px = isNaN(player.x) ? canvas.width/2 : player.x;
-                let py = isNaN(player.y) ? canvas.height/2 : player.y;
-                let pr = player.radius || 15;
+                let px = isFinite(player.x) ? player.x : canvas.width/2;
+                let py = isFinite(player.y) ? player.y : canvas.height/2;
+                let pr = isFinite(player.radius) ? player.radius : 15;
                 
-                ctx.beginPath(); ctx.arc(px, py, pr, 0, Math.PI*2);
+                ctx.beginPath(); ctx.arc(px, py, Math.max(0.1, pr), 0, Math.PI*2);
                 ctx.fillStyle = isDashing ? '#f1c40f' : (player.color || '#3498db'); ctx.fill();
                 ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
                 
-                ctx.beginPath(); ctx.arc(px, py, player.hitbox || 4, 0, Math.PI*2);
+                ctx.beginPath(); ctx.arc(px, py, Math.max(0.1, player.hitbox || 4), 0, Math.PI*2);
                 ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.fill();
             }
 
@@ -1412,7 +1341,7 @@
                     let pos = dog.history[i * 10];
                     if (pos) {
                         ctx.save(); ctx.shadowBlur = 10;
-                        ctx.beginPath(); ctx.arc(pos.x, pos.y, dog.radius * 0.8, 0, Math.PI*2);
+                        ctx.beginPath(); ctx.arc(pos.x, pos.y, Math.max(0.1, dog.radius * 0.8), 0, Math.PI*2);
                         let color = '#00ffff'; if(dog.state==='magenta'||pos.state==='magenta') color = '#e84393'; else if(dog.state.includes('purple')||pos.state.includes('purple')) color = '#8e44ad';
                         ctx.shadowColor = color; ctx.fillStyle = dog.hitFlash > 0 ? '#fff' : color; ctx.fill();
                         ctx.strokeStyle = '#2d3436'; ctx.lineWidth = 4; ctx.stroke(); ctx.restore();
@@ -1423,62 +1352,69 @@
             enemies.forEach(e => {
                 if (e.dead || e.isSegment) return;
                 
-                if (e.x < -e.radius || e.x > canvas.width + e.radius || e.y < -e.radius || e.y > canvas.height + e.radius) {
-                    let edgeX = Math.max(15, Math.min(canvas.width - 15, e.x));
-                    let edgeY = Math.max(15, Math.min(canvas.height - 15, e.y));
-                    ctx.beginPath(); ctx.arc(edgeX, edgeY, e.radius * 0.7, 0, Math.PI*2);
+                let safeR = Math.max(0.1, isFinite(e.radius) ? e.radius : 15);
+                let ex = isFinite(e.x) ? e.x : -100;
+                let ey = isFinite(e.y) ? e.y : -100;
+                
+                if (ex < -safeR || ex > canvas.width + safeR || ey < -safeR || ey > canvas.height + safeR) {
+                    let edgeX = Math.max(15, Math.min(canvas.width - 15, ex));
+                    let edgeY = Math.max(15, Math.min(canvas.height - 15, ey));
+                    ctx.beginPath(); ctx.arc(edgeX, edgeY, safeR * 0.7, 0, Math.PI*2);
                     ctx.fillStyle = e.color; ctx.globalAlpha = 0.4; ctx.fill(); ctx.globalAlpha = 1.0;
                 }
 
                 if (e.type === 'phantom') ctx.globalAlpha = 0.2 + 0.6 * Math.abs(Math.sin(e.timer * 3));
 
                 if (e.type === 'calamitas') {
-                    ctx.save(); ctx.translate(e.x, e.y); ctx.shadowBlur = 20; ctx.shadowColor = '#e74c3c';
+                    ctx.save(); ctx.translate(ex, ey); ctx.shadowBlur = 20; ctx.shadowColor = '#e74c3c';
                     
-                    let pulse = Math.sin(Date.now()/150) * 8; let grad = ctx.createRadialGradient(0,0, e.radius*0.3, 0,0, e.radius*1.8 + pulse);
+                    let pulse = Math.sin(Date.now()/150) * 8; let grad = ctx.createRadialGradient(0,0, safeR*0.3, 0,0, safeR*1.8 + pulse);
                     grad.addColorStop(0, '#fff'); grad.addColorStop(0.3, '#f1c40f'); grad.addColorStop(0.6, '#e74c3c'); grad.addColorStop(1, 'transparent');
-                    ctx.beginPath(); ctx.arc(0, 0, e.radius*1.8 + pulse, 0, Math.PI*2); ctx.fillStyle = grad; ctx.fill();
+                    ctx.beginPath(); ctx.arc(0, 0, safeR*1.8 + pulse, 0, Math.PI*2); ctx.fillStyle = grad; ctx.fill();
                     
                     ctx.rotate(gameTime * 3); ctx.fillStyle = (e.hitFlash > 0) ? '#ffffff' : '#8e0000';
-                    for(let i=0; i<6; i++) { ctx.beginPath(); ctx.moveTo(e.radius*0.6, 0); ctx.lineTo(e.radius*1.3, -12); ctx.lineTo(e.radius*1.3, 12); ctx.fill(); ctx.rotate(Math.PI / 3); }
+                    for(let i=0; i<6; i++) { ctx.beginPath(); ctx.moveTo(safeR*0.6, 0); ctx.lineTo(safeR*1.3, -12); ctx.lineTo(safeR*1.3, 12); ctx.fill(); ctx.rotate(Math.PI / 3); }
                     
-                    ctx.beginPath(); ctx.arc(0, 0, e.radius * 0.7, 0, Math.PI*2); ctx.fillStyle = '#111'; ctx.fill(); 
+                    ctx.beginPath(); ctx.arc(0, 0, safeR * 0.7, 0, Math.PI*2); ctx.fillStyle = '#111'; ctx.fill(); 
                     ctx.lineWidth = 3; ctx.strokeStyle = '#e74c3c'; ctx.stroke(); 
                     ctx.restore();
                     
                 } else if (e.type === 'tasmanian') {
-                    ctx.save(); ctx.translate(e.x, e.y); ctx.shadowBlur = 15; ctx.shadowColor = '#cd853f';
-                    ctx.beginPath(); ctx.arc(0, 0, e.radius, 0, Math.PI*2); ctx.fillStyle = e.hitFlash > 0 ? '#fff' : '#cd853f'; ctx.fill();
+                    ctx.save(); ctx.translate(ex, ey); ctx.shadowBlur = 15; ctx.shadowColor = '#cd853f';
+                    ctx.beginPath(); ctx.arc(0, 0, safeR, 0, Math.PI*2); ctx.fillStyle = e.hitFlash > 0 ? '#fff' : '#cd853f'; ctx.fill();
                     ctx.fillStyle = '#8b4513'; ctx.beginPath(); ctx.arc(-15, -15, 8, 0, Math.PI*2); ctx.arc(15, -15, 8, 0, Math.PI*2); ctx.fill();
                     ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(-15, -15, 4, 0, Math.PI*2); ctx.arc(15, -15, 4, 0, Math.PI*2); ctx.fill();
                     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-20, 10); ctx.lineTo(20, 10); ctx.lineTo(0, 25); ctx.fill();
                     ctx.restore();
-                } else if (e.type === 'dog' && e.radius > 0 && e.history && e.history.length > 0) {
-                    ctx.save(); ctx.translate(e.x, e.y);
+                } else if (e.type === 'dog' && safeR > 0 && e.history && e.history.length > 0) {
+                    ctx.save(); ctx.translate(ex, ey);
                     let color = '#00ffff'; if(e.state==='magenta') color = '#e84393'; else if(e.state.includes('purple')) color = '#8e44ad';
                     ctx.shadowBlur = 20; ctx.shadowColor = color;
-                    ctx.beginPath(); ctx.arc(0, 0, e.radius, 0, Math.PI*2); ctx.fillStyle = e.hitFlash > 0 ? '#fff' : color; ctx.fill();
+                    ctx.beginPath(); ctx.arc(0, 0, safeR, 0, Math.PI*2); ctx.fillStyle = e.hitFlash > 0 ? '#fff' : color; ctx.fill();
                     
                     let angle = e.history[1] ? Math.atan2(e.y - e.history[1].y, e.x - e.history[1].x) : 0;
                     ctx.rotate(angle);
-                    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(e.radius*0.4, -e.radius*0.4, e.radius*0.2, 0, Math.PI*2); ctx.arc(e.radius*0.4, e.radius*0.4, e.radius*0.2, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(e.radius*0.5, -e.radius*0.4, e.radius*0.05, 0, Math.PI*2); ctx.arc(e.radius*0.5, e.radius*0.4, e.radius*0.05, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(safeR*0.4, -safeR*0.4, safeR*0.2, 0, Math.PI*2); ctx.arc(safeR*0.4, safeR*0.4, safeR*0.2, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(safeR*0.5, -safeR*0.4, safeR*0.05, 0, Math.PI*2); ctx.arc(safeR*0.5, safeR*0.4, safeR*0.05, 0, Math.PI*2); ctx.fill();
                     
-                    ctx.fillStyle = '#2d3436'; ctx.beginPath(); ctx.moveTo(e.radius, -e.radius*0.6); ctx.lineTo(e.radius*1.5, -e.radius*0.2); ctx.lineTo(e.radius, 0); ctx.fill();
-                    ctx.beginPath(); ctx.moveTo(e.radius, e.radius*0.6); ctx.lineTo(e.radius*1.5, e.radius*0.2); ctx.lineTo(e.radius, 0); ctx.fill();
+                    ctx.fillStyle = '#2d3436'; ctx.beginPath(); ctx.moveTo(safeR, -safeR*0.6); ctx.lineTo(safeR*1.5, -safeR*0.2); ctx.lineTo(safeR, 0); ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(safeR, safeR*0.6); ctx.lineTo(safeR*1.5, safeR*0.2); ctx.lineTo(safeR, 0); ctx.fill();
                     ctx.restore();
                 } else if (e.type !== 'dog') {
                     ctx.fillStyle = (e.hitFlash > 0) ? '#ffffff' : e.color; if (e.hitFlash > 0) e.hitFlash--;
-                    ctx.beginPath(); ctx.arc(e.x, e.y, e.radius, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(ex, ey, safeR, 0, Math.PI*2); ctx.fill();
                 }
                 
                 ctx.globalAlpha = 1.0;
 
-                if ((e.type === 'calamitas' || e.type === 'dog' || e.type === 'tasmanian') && e.invincible && e.radius > 0) {
-                    ctx.beginPath(); ctx.arc(e.x, e.y, e.radius + 20 + Math.sin(Date.now()/150)*5, 0, Math.PI*2); 
+                if ((e.type === 'calamitas' || e.type === 'dog' || e.type === 'tasmanian') && e.invincible && safeR > 0) {
+                    ctx.beginPath(); ctx.arc(ex, ey, safeR + 20 + Math.sin(Date.now()/150)*5, 0, Math.PI*2); 
                     ctx.strokeStyle = 'rgba(241, 196, 15, 0.6)'; ctx.lineWidth = 4; ctx.stroke();
                 }
-                if (e.type !== 'calamitas' && e.type !== 'dog' && e.type !== 'tasmanian') { ctx.fillStyle = 'red'; ctx.fillRect(e.x - e.radius, e.y - e.radius - 12, (e.radius*2) * (e.hp/e.maxHp), 4); }
+                if (e.type !== 'calamitas' && e.type !== 'dog' && e.type !== 'tasmanian') { 
+                    let hpRatio = isFinite(e.hp/e.maxHp) ? Math.max(0, e.hp/e.maxHp) : 0;
+                    ctx.fillStyle = 'red'; ctx.fillRect(ex - safeR, ey - safeR - 12, (safeR*2) * hpRatio, 4); 
+                }
             });
 
             let boss = enemies.find(e => (e.type === 'calamitas' || e.type === 'dog' || e.type === 'tasmanian') && !e.dead);
@@ -1488,12 +1424,14 @@
                 let bColor = '#c0392b';
                 if(boss.type === 'dog') { bColor = boss.state === 'magenta' ? '#e84393' : (boss.state.includes('purple') ? '#8e44ad' : '#00ffff'); }
                 else if(boss.type === 'tasmanian') { bColor = '#cd853f'; }
-                ctx.fillStyle = bColor; ctx.fillRect(bx, by, barW * Math.max(0, boss.hp / boss.maxHp), barH);
+                
+                let hpRatio = isFinite(boss.hp/boss.maxHp) ? Math.max(0, boss.hp/boss.maxHp) : 0;
+                ctx.fillStyle = bColor; ctx.fillRect(bx, by, barW * hpRatio, barH);
                 ctx.strokeStyle = '#f1c40f'; ctx.lineWidth = 2; ctx.strokeRect(bx, by, barW, barH);
                 
                 ctx.fillStyle = '#fff'; ctx.font = 'bold 16px Malgun Gothic'; ctx.textAlign = 'center';
                 let bName = boss.type === 'dog' ? (boss.phase===2 ? '신들의 포식자 (진정한 모습)' : '신들의 포식자') : (boss.type === 'tasmanian' ? '타즈메니아 주머니 늑대' : '클론 칼라미타스');
-                ctx.fillText(`${bName} - ${(Math.max(0, boss.hp/boss.maxHp)*100).toFixed(1)}%`, canvas.width/2, by + 15);
+                ctx.fillText(`${bName} - ${(hpRatio*100).toFixed(1)}%`, canvas.width/2, by + 15);
             }
         } catch (err) {
             console.error("Canvas draw error bypassed:", err);
@@ -1510,19 +1448,17 @@
             showDialogue("불굴의 의지로 부활했습니다!", 3000); return;
         }
         isGameOver = true; 
-        if(!isGuest) localStorage.removeItem('skillSurvivorSave_Offline'); 
         
         setTimeout(()=> { 
-            if(!isGuest) {
-                const lb = JSON.parse(localStorage.getItem('skillSurvivorLB_Offline')) || [];
-                let playerName = prompt(`GAME OVER!\n최종 점수: ${score}점\n명예의 전당에 등록할 이름을 입력하세요 (최대 10자):`, "Player");
-                if(!playerName) playerName = "Unknown";
-                
-                lb.push({ name: playerName.substring(0, 10), score: score });
-                lb.sort((a, b) => b.score - a.score);
-                lb.splice(5); 
-                localStorage.setItem('skillSurvivorLB_Offline', JSON.stringify(lb));
-            }
+            const lb = JSON.parse(localStorage.getItem('skillSurvivorLB_Offline')) || [];
+            let playerName = prompt(`GAME OVER!\n최종 점수: ${score}점\n명예의 전당에 등록할 이름을 입력하세요 (최대 10자):`, "Player");
+            if(!playerName) playerName = "Unknown";
+            
+            lb.push({ name: playerName.substring(0, 10), score: score });
+            lb.sort((a, b) => b.score - a.score);
+            lb.splice(5); 
+            localStorage.setItem('skillSurvivorLB_Offline', JSON.stringify(lb));
+            
             alert(`GAME OVER! 최종 점수: ${score}`);
             location.reload(); 
         }, 100); 
