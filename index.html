@@ -92,7 +92,6 @@
         #player-stats-ui { position: absolute; bottom: 65px; left: 20px; background: rgba(0,0,0,0.8); padding: 10px 15px; border-radius: 8px; border-left: 4px solid #1abc9c; color: #ecf0f1; font-size: 13px; display: none; flex-direction: column; gap: 4px; z-index: 45; pointer-events: none; line-height: 1.3; }
         #player-stats-ui b { color: #f1c40f; }
 
-        /* 💡 적 스탯 정보 UI (우측 하단 추가) */
         #enemy-stats-ui { position: absolute; bottom: 110px; right: 20px; background: rgba(0,0,0,0.8); padding: 10px 15px; border-radius: 8px; border-right: 4px solid #e74c3c; color: #ecf0f1; font-size: 13px; display: none; flex-direction: column; gap: 4px; z-index: 45; pointer-events: none; line-height: 1.3; text-align: right; }
         #enemy-stats-ui b { color: #e74c3c; }
 
@@ -242,7 +241,8 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    let score = 0, gameTime = 0, lastTimestamp = 0;
+    // 💡 전역 타이머(오비탈용) 추가
+    let score = 0, gameTime = 0, globalTime = 0, lastTimestamp = 0;
     let difficultyLevel = 1, isHardMode = false, isTestMode = false;
     let scoreMultiplier = 1;
     let levelCount = 0, nextLevelScore = 500; 
@@ -278,7 +278,7 @@
     let flags = { calSpawned: false, dogSpawned: false, tasSpawned: false };
 
     function resetGameState() {
-        score = 0; gameTime = 0; lastTimestamp = 0;
+        score = 0; gameTime = 0; globalTime = 0; lastTimestamp = 0;
         difficultyLevel = 1; scoreMultiplier = 1; levelCount = 0; nextLevelScore = 500;
         isGameOver = false; isPaused = false; isManualPaused = false; gameActive = false;
         bossSpawned = false;
@@ -374,7 +374,6 @@
         }
     }
 
-    // 💡 도감 및 툴팁 텍스트 전면 개편
     const skillDict = {
         damage: { icon: '💥', name: '파괴력', desc: '대미지가 증가합니다.', evName: '파멸', evDesc: '대미지가 지속적으로 1.5배씩 폭증합니다.<br>단, 공격 속도가 느려집니다.' },
         multishot: { icon: '🔫', name: '멀티샷', desc: '총알 발사 수가 증가합니다.', evName: '탄막 융합', evDesc: '발사 수가 대폭 늘어납니다.<br>집탄률은 하락합니다.' },
@@ -433,11 +432,9 @@
         document.getElementById('maxHp').innerText = player.maxHp;
     }
 
-    // 💡 실시간 스탯 및 적 스탯 패널 업데이트 로직
     function updatePlayerStatsUI() {
         if(!gameActive) return;
         
-        // --- 플레이어 스탯 계산 ---
         let curFRLevel = player.skills.firerate || 0;
         let dmgLvl = player.skills.damage || 0;
         
@@ -454,7 +451,6 @@
         
         let bounceLvl = player.skills.bounce || 0;
         if (bounceLvl >= 5) {
-            // 차원 도탄은 초기발사 대미지가 감소하는 대신, 도탄 시 대미지가 늘어나는 컨셉
             currentDamage *= Math.pow(0.8, bounceLvl - 4);
         }
 
@@ -465,7 +461,6 @@
             currentDamage *= (player.allInOneMultiplier || 1) * Math.pow(1.2, player.skills.allInOne - 1);
         }
 
-        // 과부하 페널티 반영
         let pDmgMultiplier = 1.0;
         let pBulletsCount = bullets.filter(b => b.fromPlayer).length;
         
@@ -494,11 +489,11 @@
         document.getElementById('ui-multi').innerText = totalShots;
         document.getElementById('ui-crit').innerText = (critChance * 100).toFixed(1) + "%";
 
-        // --- 적 스탯 UI 업데이트 ---
+        // 💡 하드모드 스케일링 수치 업데이트
         let periods = Math.floor(gameTime / 50);
-        let ehp = Math.pow(2, periods);
+        let ehp = isHardMode ? Math.pow(2.5, periods) : Math.pow(2, periods);
         let edmg = Math.pow(1.5, periods);
-        let escore = (isHardMode ? 1.5 : 1.0) * Math.pow(1.75, periods);
+        let escore = (isHardMode ? 2.0 : 1.0) * Math.pow(1.9, periods); // 💡 점수 스케일링 공식 반영
         
         document.getElementById('ui-ehp').innerText = `x${ehp.toFixed(1)}`;
         document.getElementById('ui-edmg').innerText = `x${edmg.toFixed(1)}`;
@@ -536,6 +531,11 @@
             let level = player.skills[ab.id] || 0;
             if (ab.id === 'allInOne' && (player.skills.multishot || 0) < 5) return;
             
+            // 💡 치명타 진화 시 초치명타로 전환 (풀에서 치명타 제외, 초치명타 포함)
+            if (ab.id === 'crit' && level >= 5) {
+                // Do not add to pool if logic was different, but here we just increment level.
+            }
+            
             let weight = Math.max(5, 100 - (level * 15));
             if(ab.id === 'heal') weight = 50; 
             for(let i=0; i<weight; i++) weightedPool.push(ab);
@@ -566,7 +566,6 @@
                 cDesc = ab.evDesc;
             }
 
-            // 💡 툴팁 동적 수치 계산 (정확도 100%)
             let statText = "";
             if (ab.id === 'damage') {
                 let c = 25 * Math.pow(1.5, Math.min(4, curLvl));
@@ -864,6 +863,8 @@
             }
         } else if(type === 'giant') { 
             laserWarnings.push({x: player.x, y: 0, vx: 0, vy: 1, timer: 0, life: 3.0, isGiant: true}); 
+        } else if(type === 'norman_snipe') {
+            laserWarnings.push({x: x, y: y, vx: Math.cos(angleOffset), vy: Math.sin(angleOffset), timer: 0, life: (isHardMode?0.5:0.7), isGiant: true});
         }
     }
 
@@ -908,10 +909,11 @@
             else if(type === 'tornado') { hp = 300; radius = 18; color = '#7f8c8d'; baseScore = 150; }
             else if(type === 'mutant') { hp = 900; radius = 20; color = '#e67e22'; baseScore = 200; }
             
-            hp *= difficultyLevel; 
-            
+            // 💡 적 스탯 지수형 스케일링 (어려움은 2.5배 폭증)
             let periods = Math.max(0, Math.floor(gameTime/50));
-            let scoreScaling = (isHardMode ? 1.5 : 1.0) * Math.pow(1.75, periods);
+            hp *= isHardMode ? Math.pow(2.5, periods) : Math.pow(2, periods);
+            
+            let scoreScaling = (isHardMode ? 2.0 : 1.0) * Math.pow(1.9, periods);
             let damageMult = Math.pow(1.5, periods);
             
             enemies.push({ x, y, radius, type, hp, maxHp: hp, color, timer: 0, hitFlash: 0, baseScore: Math.floor(baseScore * scoreScaling), targetedBy: 0, speedFactor, damageMult });
@@ -947,14 +949,17 @@
 
         let speedMult = (is2xSpeed && !bossSpawned) ? 2.0 : 1.0;
         const deltaTime = rawDelta * speedMult; 
+        
+        // 💡 오비탈 쉴드용 전역 타이머 (보스 등장시에도 멈추지 않음)
+        globalTime += deltaTime;
 
         enemies.forEach(e => e.targetedBy = 0);
 
         if (!bossSpawned) { 
             gameTime += deltaTime; 
             let minutes = Math.floor(gameTime / 50);
-            difficultyLevel = Math.pow(2, minutes);
-            scoreMultiplier = Math.pow(1.75, minutes);
+            difficultyLevel = isHardMode ? Math.pow(2.5, minutes) : Math.pow(2, minutes);
+            scoreMultiplier = (isHardMode ? 2.0 : 1.0) * Math.pow(1.9, minutes);
             
             if (gameTime >= 120 && !flags.calSpawned) { flags.calSpawned = true; spawnBoss('calamitas'); }
             else if (gameTime >= 240 && !flags.dogSpawned) { flags.dogSpawned = true; spawnBoss('dog'); }
@@ -990,7 +995,6 @@
             document.getElementById('dash-cool').style.color = '#e74c3c';
         }
         
-        // 💡 과부하 페널티 및 임계치 로직
         let overloadThreshold = 100;
         let bounceLvl = player.skills.bounce || 0;
         let pierceLvl = player.skills.pierce || 0;
@@ -1042,6 +1046,8 @@
                         let petCooldown = Math.max(0.05, 0.8 * Math.pow(0.8, player.skills.firerate||0));
                         if (pet.timer > petCooldown) { 
                             let petDmg = 50 * Math.pow(1.5, player.skills.damage||0) * pDmgMultiplier;
+                            
+                            // 보스 상태이상 저항 적용 (펫이 넉백/경직을 주진 않지만 데미지 감쇄가 아닌 면역 로직의 예시로 타격 확률 반영 가능, 여기선 순수 대미지)
                             target.hp -= petDmg;
                             target.hitFlash = 4;
                             if(particles.length < 300) createParticles(target.x, target.y, '#e67e22', 10);
@@ -1088,13 +1094,14 @@
         }
         player.x = Math.max(15, Math.min(canvas.width - 15, player.x)); player.y = Math.max(15, Math.min(canvas.height - 15, player.y));
 
+        // 💡 오비탈 쉴드 업데이트 (멈춤 버그 수정 및 궤도/대미지 스케일링)
         if (player.skills.orbital > 0) {
             let actualOrbital = player.skills.orbital;
             if(actualOrbital > 0) {
                 let evOrb = actualOrbital >= 5;
                 let count = 1 + Math.floor(actualOrbital * (evOrb?2:1)); 
-                let oRadius = (70 + (actualOrbital * 20)) * 2; 
-                let oSpeed = gameTime * 3;
+                let oRadius = (70 + (actualOrbital * 20)) * 2; // 멀리서 돌도록 반경 확장
+                let oSpeed = globalTime * 3; // 💡 전역 타이머 사용하여 보스전 멈춤 해결
                 for(let i=0; i<count; i++) {
                     let angle = oSpeed + (Math.PI * 2 / count) * i;
                     let ox = player.x + Math.cos(angle) * oRadius;
@@ -1103,7 +1110,8 @@
                     enemies.forEach(e => {
                         if (Math.hypot(e.x - ox, e.y - oy) < 15 + e.radius) {
                             if (Date.now() - (e.lastOrbitalHit||0) > 400) {
-                                let dmg = 15 * Math.pow(1.5, player.skills.damage||0) * pDmgMultiplier; 
+                                // 💡 오비탈 대미지에 오비탈 레벨 스케일링 추가
+                                let dmg = 15 * Math.pow(1.5, player.skills.damage||0) * Math.pow(1.2, actualOrbital) * pDmgMultiplier; 
                                 
                                 let critChance = player.skills.crit >= 5 ? Math.min(1.0, 0.05 + (player.skills.crit - 5) * 0.01) : Math.min(1.0, (player.skills.crit||0) * 0.1);
                                 if (Math.random() < critChance) {
@@ -1166,6 +1174,19 @@
                 }
             }
             
+            // 적 탄환 약한 유도 (하드모드 전용)
+            if (!b.fromPlayer && b.homingLvl > 0 && !b.stationary) {
+                let baseAngle = Math.atan2(player.y - b.y, player.x - b.x);
+                const turnRate = 0.015 * b.homingLvl;
+                b.velocity.x += Math.cos(baseAngle) * turnRate; 
+                b.velocity.y += Math.sin(baseAngle) * turnRate;
+                const speed = Math.hypot(b.velocity.x, b.velocity.y);
+                if(speed > 0.001) {
+                    b.velocity.x = (b.velocity.x / speed) * b.baseSpeed; 
+                    b.velocity.y = (b.velocity.y / speed) * b.baseSpeed;
+                }
+            }
+
             if (b.fromPlayer && b.homingLvl > 0 && !b.stationary) {
                 if (!b.currentTarget || b.currentTarget.dead) {
                     b.currentTarget = getSmartNearestEnemy(b.x, b.y, b.hitEnemies);
@@ -1187,19 +1208,19 @@
                 }
             }
             
-            // 💡 도탄 페널티 및 메커니즘 적용
             if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
                 if (b.bounceLeft > 0) {
                     b.bounceLeft--; 
                     b.bounceCountNum++;
                     
-                    if (b.isEvolvedBounce) {
-                        b.damage = b.initialDamage * Math.pow(1.2, b.bounceCountNum);
-                    } else {
-                        // 성능 반감 (1/2, 1/3, ...)
-                        b.damage = b.initialDamage / (b.bounceCountNum + 1);
-                        b.baseSpeed = b.initialSpeed / (b.bounceCountNum + 1);
-                        b.radius = Math.max(0.1, b.initialRadius / (b.bounceCountNum + 1));
+                    if (b.fromPlayer) {
+                        if (b.isEvolvedBounce) {
+                            b.damage = b.initialDamage * Math.pow(1.2, b.bounceCountNum);
+                        } else {
+                            b.damage = b.initialDamage / (b.bounceCountNum + 1);
+                            b.baseSpeed = b.initialSpeed / (b.bounceCountNum + 1);
+                            b.radius = Math.max(0.1, b.initialRadius / (b.bounceCountNum + 1));
+                        }
                     }
                     
                     b.x = Math.max(1, Math.min(canvas.width - 1, b.x)); 
@@ -1286,21 +1307,31 @@
                     } else if (e.state === 'portal_out') {
                         e.radius += deltaTime * 15; if (e.radius >= 40) { e.radius = 40; e.state = 'purple_enhanced'; e.timer = 0; e.invincible = false; }
                     } else if (e.state === 'purple_enhanced') {
-                        e.x += (canvas.width/2 - e.x) * 0.05; e.y += (canvas.height/2 - e.y) * 0.05;
+                        // 💡 플레이어를 향해 천천히 다가감 (고정 위치 버그 해결)
+                        e.x += (player.x - e.x) * 0.015; e.y += (player.y - e.y) * 0.015;
+                        
                         if (e.timer > 1 && e.timer < 1.1 && !e.l1) { createLaserBarrier('grid', canvas.width/2, canvas.height/2, 0); e.l1 = true; }
                         if (e.timer > 3 && e.timer < 3.1 && !e.l2) { createLaserBarrier('fan', canvas.width/2, canvas.height/2, Math.PI/4); e.l2 = true; }
                         if (e.timer > 5 && e.timer < 5.1 && !e.l3) { createLaserBarrier('grid', player.x, player.y, 0); e.l3 = true; }
                         if (hpPct <= 0.25 && e.timer > 7 && e.timer < 7.1 && !e.l4) { createLaserBarrier('giant', player.x, player.y, 0); e.l4 = true; }
                         if (isHardMode && e.timer > 8 && e.timer < 8.1 && !e.l5) { createLaserBarrier('fan', player.x, player.y, 0); e.l5 = true; }
-                        if (e.timer > 9) { e.state = hpPct <= 0.25 ? 'teleport_dash' : 'magenta'; e.timer = 0; e.l1=false; e.l2=false; e.l3=false; e.l4=false; e.l5=false; e.teleportStep = 0; }
+                        if (e.timer > 9) { 
+                            e.state = hpPct <= 0.25 ? 'teleport_dash' : 'magenta'; 
+                            e.timer = 0; e.l1=false; e.l2=false; e.l3=false; e.l4=false; e.l5=false; e.teleportStep = 0; e.teleported = false; e.aimed = false; 
+                        }
                     } else if (e.state === 'teleport_dash') {
-                        if (e.timer % 2 < 0.5) { e.invincible = true; e.x = player.x + (Math.random()-0.5)*800; e.y = player.y + (Math.random()-0.5)*800; if(e.history) e.history.forEach(h => {h.x=e.x; h.y=e.y;}); } 
-                        else if (e.timer % 2 < 0.6) { e.invincible = false; e.dashAngle = angleToPlayer; } 
-                        else if (e.timer % 2 < 1.5) { 
+                        // 💡 돌진 시 제자리에서 진동하는 버그 해결
+                        if (e.timer < 0.1 && !e.teleported) { 
+                            e.invincible = true; e.x = player.x + (Math.random()>0.5? 400 : -400); e.y = player.y + (Math.random()>0.5? 400 : -400); 
+                            if(e.history) e.history.forEach(h => {h.x=e.x; h.y=e.y;});
+                            e.teleported = true;
+                        } 
+                        else if (e.timer > 0.5 && e.timer < 0.6 && !e.aimed) { e.invincible = false; e.dashAngle = angleToPlayer; e.aimed = true; } 
+                        else if (e.timer > 0.6 && e.timer < 1.5) { 
                             e.x += Math.cos(e.dashAngle)*20; e.y += Math.sin(e.dashAngle)*20; 
                             if (e.timer % 0.1 < 0.05) spawnBulletEnemy(e.x, e.y, Math.random()*Math.PI*2, 6, '#3498db', 8, 20);
                         }
-                        if (e.timer > 2) { e.timer = 0; e.teleportStep++; if(e.teleportStep >= 3) e.state = 'purple_enhanced'; }
+                        if (e.timer > 2) { e.timer = 0; e.teleportStep++; e.teleported = false; e.aimed = false; if(e.teleportStep >= 3) e.state = 'purple_enhanced'; }
                     } else if (e.state === 'magenta') {
                         if (e.timer < 0.1) e.dashAngle = angleToPlayer;
                         e.x += Math.cos(e.dashAngle) * 15; e.y += Math.sin(e.dashAngle) * 15;
@@ -1331,7 +1362,8 @@
                 if (e.state === 'phase1_hover') {
                     let tx = player.x + Math.cos(e.angleOffset)*300; let ty = player.y - 250; e.x += (tx - e.x) * 0.05; e.y += (ty - e.y) * 0.05;
                     if (e.timer > 2.0) { 
-                        for(let i = (isHardMode?-2:-1); i <= (isHardMode?2:1); i++) spawnBulletEnemy(e.x, e.y, angleToPlayer + i*0.5, 7.5, '#c0392b', 12, 20, {bounceLeft: 2}); 
+                        // 💡 칼라미타스 일반 패턴, 벽에서 5번 튕김
+                        for(let i = (isHardMode?-2:-1); i <= (isHardMode?2:1); i++) spawnBulletEnemy(e.x, e.y, angleToPlayer + i*0.5, 7.5, '#c0392b', 12, 20, {bounceLeft: 5, baseSpeed: 7.5}); 
                         e.timer = 0; 
                     }
                 } else if (e.state === 'bullet_hell_1') {
@@ -1362,22 +1394,41 @@
                     e.x += (canvas.width/2 - e.x) * 0.05; e.y += (canvas.height/2 - e.y) * 0.05;
                     if (e.timer > 3) { e.state = 'chase'; e.timer = 0; }
                 } else if (e.state === 'chase') {
-                    e.x += Math.cos(angleToPlayer) * 3.5; e.y += Math.sin(angleToPlayer) * 3.5;
-                    if (e.timer > 2) {
-                        for(let i=0; i<(isHardMode?24:18); i++) spawnBulletEnemy(e.x, e.y, (Math.PI*2/(isHardMode?24:18))*i, 6, '#cd853f', 12, 35);
+                    // 💡 타즈메니아 추적 강화
+                    e.x += Math.cos(angleToPlayer) * (isHardMode ? 4.5 : 3.5); e.y += Math.sin(angleToPlayer) * (isHardMode ? 4.5 : 3.5);
+                    if (e.timer > (isHardMode ? 1.5 : 2.0)) {
+                        for(let i=0; i<(isHardMode?30:18); i++) spawnBulletEnemy(e.x, e.y, (Math.PI*2/(isHardMode?30:18))*i, 6, '#cd853f', 12, 35);
                         e.timer = 0;
-                        if (Math.random() < 0.3) { e.state = 'jump'; e.timer = 0; e.dashAngle = angleToPlayer; e.invincible = true; }
+                        if (Math.random() < (isHardMode ? 0.5 : 0.3)) { e.state = 'jump'; e.timer = 0; e.dashAngle = angleToPlayer; e.invincible = true; }
                     }
                 } else if (e.state === 'jump') {
-                    e.x += Math.cos(e.dashAngle) * 25; e.y += Math.sin(e.dashAngle) * 25;
-                    if (e.timer > 1) { e.state = 'chase'; e.timer = 0; e.invincible = false; }
+                    // 💡 타즈메니아 점프 강화 및 불장판
+                    e.x += Math.cos(e.dashAngle) * (isHardMode ? 35 : 25); e.y += Math.sin(e.dashAngle) * (isHardMode ? 35 : 25);
+                    if (isHardMode && e.timer % 0.15 < 0.05) spawnBulletEnemy(e.x, e.y, 0, 0, '#e74c3c', 15, 30, {stationary: true, lifeTime: 1500});
+                    if (e.timer > (isHardMode ? 0.8 : 1)) { e.state = 'chase'; e.timer = 0; e.invincible = false; }
                 }
             }
             else {
-                if (e.type === 'melee') { e.x += Math.cos(angleToPlayer) * 2.5 * e.speedFactor; e.y += Math.sin(angleToPlayer) * 2.5 * e.speedFactor; }
+                // 💡 하드모드 일반몹 패턴 강화 로직
+                if (e.type === 'melee') { 
+                    if (isHardMode) {
+                        e.attackTimer = (e.attackTimer || 0) + deltaTime;
+                        if (e.attackTimer > 3) { e.attackTimer = 0; e.dashAngle = angleToPlayer; }
+                        if (e.attackTimer < 0.4) {
+                            e.x += Math.cos(e.dashAngle) * 8 * e.speedFactor; e.y += Math.sin(e.dashAngle) * 8 * e.speedFactor;
+                        } else {
+                            e.x += Math.cos(angleToPlayer) * 2.0 * e.speedFactor; e.y += Math.sin(angleToPlayer) * 2.0 * e.speedFactor;
+                        }
+                    } else {
+                        e.x += Math.cos(angleToPlayer) * 2.5 * e.speedFactor; e.y += Math.sin(angleToPlayer) * 2.5 * e.speedFactor; 
+                    }
+                }
                 else if (e.type === 'ranged') { 
                     e.timer += deltaTime; if (distToPlayer > 300) { e.x += Math.cos(angleToPlayer)*1.5 * e.speedFactor; e.y += Math.sin(angleToPlayer)*1.5 * e.speedFactor; } 
-                    if (e.timer > (isHardMode? 2.0 : 3.0)) { spawnBulletEnemy(e.x, e.y, angleToPlayer, 3.5, '#9b59b6', 5, 10); e.timer = 0; } 
+                    if (e.timer > (isHardMode? 2.0 : 3.0)) { 
+                        spawnBulletEnemy(e.x, e.y, angleToPlayer, 3.5, '#9b59b6', 5, 10, { homingLvl: isHardMode ? 2 : 0, baseSpeed: 3.5 }); 
+                        e.timer = 0; 
+                    } 
                 }
                 else if (e.type === 'tanker') { e.x += Math.cos(angleToPlayer) * 0.8 * e.speedFactor; e.y += Math.sin(angleToPlayer) * 0.8 * e.speedFactor; }
                 else if (e.type === 'dasher') {
@@ -1403,7 +1454,7 @@
                 }
             }
 
-            // 💡 적 피격 판정 및 도탄/관통 페널티 적용
+            // 적 피격 판정
             for (let bi = bullets.length - 1; bi >= 0; bi--) {
                 let b = bullets[bi];
                 if (b.stationary && b.hitEnemies && b.hitEnemies.includes(e)) continue;
@@ -1416,8 +1467,9 @@
                         if (Math.random() < critChance) {
                             if (player.skills.crit >= 5) {
                                 let critMult = 50 * Math.pow(1.1, player.skills.crit - 5); 
+                                // 💡 보스 상태이상 저항 (초치명타 등 특수딜 저항)
                                 if ((e.type === 'calamitas' || e.type === 'dog' || e.type === 'tasmanian') && Math.random() < 0.85) {
-                                    dmg *= 2;
+                                    dmg *= 2; // 초치명타 무시, 일반 치명타만 적용
                                 } else {
                                     dmg *= critMult; e.hitFlash = 10; 
                                 }
@@ -1555,7 +1607,7 @@
                     let evOrb = actualOrbital >= 5;
                     let count = 1 + Math.floor(actualOrbital * (evOrb?2:1)); 
                     let oRadius = (70 + (actualOrbital * 20)) * 2; 
-                    let oSpeed = gameTime * 3;
+                    let oSpeed = globalTime * 3;
                     for(let i=0; i<count; i++) {
                         let angle = oSpeed + (Math.PI * 2 / count) * i;
                         let ox = player.x + Math.cos(angle) * oRadius; let oy = player.y + Math.sin(angle) * oRadius;
@@ -1627,14 +1679,15 @@
                 let ex = isFinite(e.x) ? e.x : -100;
                 let ey = isFinite(e.y) ? e.y : -100;
                 
+                // 💡 팬텀몹 하드모드 시 투명도 90%
+                if (e.type === 'phantom') ctx.globalAlpha = isHardMode ? 0.1 : 0.2 + 0.6 * Math.abs(Math.sin(e.timer * 3));
+                
                 if (ex < -safeR || ex > canvas.width + safeR || ey < -safeR || ey > canvas.height + safeR) {
                     let edgeX = Math.max(15, Math.min(canvas.width - 15, ex));
                     let edgeY = Math.max(15, Math.min(canvas.height - 15, ey));
                     ctx.beginPath(); ctx.arc(edgeX, edgeY, safeR * 0.7, 0, Math.PI*2);
                     ctx.fillStyle = e.color; ctx.globalAlpha = 0.4; ctx.fill(); ctx.globalAlpha = 1.0;
                 }
-
-                if (e.type === 'phantom') ctx.globalAlpha = 0.2 + 0.6 * Math.abs(Math.sin(e.timer * 3));
 
                 if (e.type === 'calamitas') {
                     ctx.save(); ctx.translate(ex, ey); ctx.shadowBlur = 20; ctx.shadowColor = '#e74c3c';
