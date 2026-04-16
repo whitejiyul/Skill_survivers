@@ -3,31 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>스킬 서바이버 - 얼티밋 퓨어 오프라인 (기믹 리메이크)</title>
+    <title>스킬 서바이버 - 얼티밋 하드코어 밸런스</title>
     <style>
         body { background-color: #050505; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; color: white; font-family: 'Malgun Gothic', sans-serif; overflow: hidden; user-select: none; touch-action: none; }
-        
-        canvas { 
-            background-color: #0a0e14; border: 4px solid #3498db; border-radius: 10px;
-            cursor: crosshair; display: none; max-width: 95vw; max-height: 85vh; 
-            box-shadow: 0 0 50px rgba(52, 152, 219, 0.2); 
-        }
-
-        #start-screen { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; height: 100vh; overflow-y: auto; padding: 20px 0; width: 100%; background: #050505; }
+        canvas { background-color: #0a0e14; border: 4px solid #3498db; border-radius: 10px; cursor: crosshair; display: none; max-width: 95vw; max-height: 85vh; box-shadow: 0 0 50px rgba(52, 152, 219, 0.2); }
+        #start-screen { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; height: 100vh; width: 100%; background: #050505; }
         #start-screen h1 { font-size: 65px; color: #f1c40f; text-shadow: 0 0 40px rgba(241,196,15,0.8); margin-bottom: 10px; letter-spacing: 5px; text-align: center;}
         #start-screen h3 { color: #3498db; margin-bottom: 30px; letter-spacing: 2px; }
-        
         .diff-btn { width: 280px; padding: 15px; margin: 8px; font-size: 20px; font-weight: bold; cursor: pointer; border: none; border-radius: 10px; transition: 0.3s; color: white; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         #normal-btn { background: linear-gradient(135deg, #27ae60, #2ecc71); }
         #hard-btn { background: linear-gradient(135deg, #8e44ad, #9b59b6); }
-        #dict-btn { background: linear-gradient(135deg, #2980b9, #3498db); }
         #test-btn { background: linear-gradient(135deg, #34495e, #2c3e50); }
         .diff-btn:hover { transform: translateY(-3px) scale(1.05); filter: brightness(1.2); }
-
         .checkbox-group { margin-top: 15px; background: rgba(0,0,0,0.6); padding: 15px 25px; border-radius: 10px; border: 1px solid #555; display: flex; flex-direction: column; gap: 10px; }
         .checkbox-group label { font-size:18px; cursor:pointer; color:#bdc3c7; display: flex; align-items: center; }
         .checkbox-group input { transform: scale(1.5); margin-right: 15px; }
-
         #dict-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,5,0.95); z-index: 90; display: none; flex-direction: column; align-items: center; padding-top: 50px; overflow-y: auto; }
         #dict-screen h1 { color: #3498db; font-size: 40px; margin-bottom: 20px; text-shadow: 0 0 20px rgba(52,152,219,0.5); }
         .dict-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1000px; width: 90%; margin-bottom: 50px; }
@@ -35,15 +25,15 @@
         .dict-card h3 { color: #f1c40f; margin-top: 0; margin-bottom: 5px; }
         .dict-card p { font-size: 13px; line-height: 1.4; margin: 5px 0; }
         .dict-card .evo-text { color: #e74c3c; font-weight: bold; margin-top: 10px; }
-
-        #subweapon-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 80; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        
+        #subweapon-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 80; display: none; flex-direction: column; align-items: center; padding-top: 100px; }
         #subweapon-screen h1 { font-size: 50px; color: #f1c40f; margin-bottom: 40px; text-shadow: 0 0 20px rgba(241,196,15,0.8); }
         .sub-btn-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
         .sub-btn { padding: 30px 20px; font-size: 22px; font-weight: bold; cursor: pointer; background: linear-gradient(145deg, #1e2a38, #111a22); color: #fff; border: 3px solid #3498db; border-radius: 15px; transition: 0.3s; display: flex; flex-direction: column; align-items: center; width: 240px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .sub-btn:hover { transform: scale(1.05) translateY(-10px); border-color: #f1c40f; box-shadow: 0 0 30px rgba(241,196,15,0.6); }
         .sub-icon { font-size: 60px; margin-bottom: 15px; }
         .sub-desc { font-size: 13px; color: #bdc3c7; margin-top: 15px; line-height: 1.4; text-align: center; word-break: keep-all; }
-
+        
         #leaderboard { margin-top: 25px; background: rgba(10, 14, 20, 0.9); padding: 20px 30px; border-radius: 15px; border: 2px solid #f1c40f; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         #leaderboard h2 { margin: 0 0 15px 0; color: #f1c40f; font-size: 22px; text-align: center; text-shadow: 0 2px 4px #000; }
         .lb-entry { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
@@ -51,21 +41,20 @@
         .lb-entry:nth-child(2) { color: #c0c0c0; font-weight: bold; font-size: 17px; } 
         .lb-entry:nth-child(3) { color: #cd7f32; font-weight: bold; } 
         .lb-empty { text-align: center; color: #777; font-size: 14px; margin-top: 10px; }
-
         #hud { position: absolute; top: 40px; width: 1200px; max-width: 95vw; display: none; justify-content: space-between; padding: 0 20px; box-sizing: border-box; pointer-events: none; z-index: 5; }
         .stat-box { background: rgba(0,0,0,0.8); padding: 8px 20px; border-radius: 8px; border-left: 4px solid #f1c40f; font-weight: bold; font-size: 18px; color: #ecf0f1; transition: 0.3s; }
         .boss-timer { border-left-color: #e74c3c !important; color: #e74c3c !important; text-shadow: 0 0 10px #e74c3c; animation: pulse 1s infinite; }
-        
         #pause-btn { position: absolute; top: 15px; right: 20px; font-size: 20px; cursor: pointer; z-index: 50; display: none; pointer-events: auto; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 5px; border: 1px solid #fff; }
-        #pause-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        #pause-screen h2 { font-size: 50px; color: #fff; letter-spacing: 5px; margin-bottom: 10px; }
+        
+        /* 💡 모바일 일시정지 해제 가능하도록 설정 */
+        #pause-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); cursor: pointer; }
+        #pause-screen h2 { font-size: 50px; color: #fff; letter-spacing: 5px; margin-bottom: 10px; pointer-events: none; }
+        #pause-screen p { pointer-events: none; }
 
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-
         #draw-btn-container { position: absolute; top: 50px; left: 50%; transform: translateX(-50%); z-index: 10; display: none; }
         #draw-btn { padding: 8px 20px; font-size: 16px; font-weight: bold; cursor: pointer; color: #fff; background: linear-gradient(to bottom, #f1c40f, #e67e22); border: 2px solid #fff; border-radius: 8px; animation: pulse 1.5s infinite; transition: transform 0.2s; pointer-events: auto; }
         #draw-btn:hover { transform: scale(1.1); filter: brightness(1.2); }
-
         #skill-panel { position: absolute; left: 50%; transform: translateX(-50%); bottom: 5px; background: rgba(10,10,10,0.7); padding: 2px 10px; border-radius: 8px; z-index: 6; pointer-events: none; display: none; max-width: 90vw; text-align: center; font-size: 9px; }
         #skill-panel ul { list-style: none; padding: 0; margin: 0; font-size: 9px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; color: #ddd; }
         .evolved-text { color: #f39c12; font-weight: bold; text-shadow: 0 0 3px #f39c12; }
@@ -82,27 +71,20 @@
         .card-title { margin: 0; color: #fff; font-size: 14px; text-align: left; line-height: 1.2; }
         .card-desc { font-size: 11px; color: #bdc3c7; margin-top: 3px; display: block; word-break: keep-all; }
         .card-stat { font-size: 11px; color: #ccc; font-weight: normal; margin-top: 4px; display: block; background: rgba(0,0,0,0.5); padding: 3px 5px; border-radius: 4px; border-left: 2px solid #3498db;}
-        
         @keyframes evolvePulse { from { box-shadow: 0 0 10px rgba(255, 50, 0, 0.6); border-color: #e67e22; } to { box-shadow: 0 0 25px rgba(241, 196, 15, 1); border-color: #f1c40f; } }
         .card-evolve { border-color: #ff3300 !important; background: linear-gradient(145deg, #4a0000, #220000) !important; animation: popIn 0.4s forwards, evolvePulse 0.8s infinite alternate !important; }
-
         #dialogue { position: absolute; bottom: 15%; font-size: 30px; font-weight: bold; color: #e74c3c; font-style: italic; text-shadow: 0 0 10px #000; display: none; z-index: 15; text-align: center; }
         #debuff-ui { position: absolute; top: 80px; right: 20px; font-size: 16px; font-weight: bold; color: #e74c3c; display: none; z-index: 10; text-align: right; text-shadow: 0 0 10px #000; }
         #penalty-ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); font-size: 16px; font-weight: bold; color: #e74c3c; display: none; z-index: 10; text-shadow: 0 0 8px #000; pointer-events: none; }
-        
         #player-stats-ui { position: absolute; bottom: 65px; left: 20px; background: rgba(0,0,0,0.8); padding: 10px 15px; border-radius: 8px; border-left: 4px solid #1abc9c; color: #ecf0f1; font-size: 13px; display: none; flex-direction: column; gap: 4px; z-index: 45; pointer-events: none; line-height: 1.3; }
         #player-stats-ui b { color: #f1c40f; }
-
         #enemy-stats-ui { position: absolute; bottom: 110px; right: 20px; background: rgba(0,0,0,0.8); padding: 10px 15px; border-radius: 8px; border-right: 4px solid #e74c3c; color: #ecf0f1; font-size: 13px; display: none; flex-direction: column; gap: 4px; z-index: 45; pointer-events: none; line-height: 1.3; text-align: right; }
         #enemy-stats-ui b { color: #e74c3c; }
-
         #dash-cool { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 8px 15px; border-radius: 5px; border-left: 4px solid #3498db; font-weight: bold; display: none; font-size: 12px; color: #fff; cursor: pointer; pointer-events: auto; z-index: 50; }
         #auto-fire-ind { position: absolute; bottom: 60px; right: 20px; background: rgba(0,0,0,0.8); padding: 8px 15px; border-radius: 5px; border-left: 4px solid #777; font-weight: bold; display: none; font-size: 12px; color: #777; cursor: pointer; pointer-events: auto; z-index: 50; }
         #speed-btn { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 8px 15px; border-radius: 5px; border-left: 4px solid #9b59b6; font-weight: bold; display: none; font-size: 12px; color: #fff; cursor: pointer; pointer-events: auto; z-index: 50; }
-
         #joystick-base { position: absolute; bottom: 30px; left: 30px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); z-index: 50; display: none; touch-action: none; pointer-events: auto; }
         #joystick-stick { width: 40px; height: 40px; background: rgba(52, 152, 219, 0.8); border-radius: 50%; position: absolute; top: 30px; left: 30px; pointer-events: none; }
-
         #test-ui { position: absolute; top: 10px; left: 10px; display: none; z-index: 100; flex-direction: column; gap: 5px; }
         #test-ui button { background: rgba(0,0,0,0.8); color: white; border: 1px solid #3498db; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
     </style>
@@ -200,8 +182,8 @@
 
     <div id="pause-screen">
         <h2>PAUSED</h2>
-        <p style="color:#aaa; font-size:20px; margin-top:10px;">[P]를 눌러 게임 재개</p>
-        <button id="go-main-btn" class="diff-btn" style="background: #e74c3c; width: 250px; font-size: 20px; margin-top: 30px;">메인 화면으로 종료</button>
+        <p style="color:#aaa; font-size:20px; margin-top:10px;">화면을 터치하거나 [P]를 눌러 게임 재개</p>
+        <button id="go-main-btn" class="diff-btn" style="background: #e74c3c; width: 250px; font-size: 20px; margin-top: 30px; pointer-events: auto;">메인 화면으로 종료</button>
     </div>
 
     <div id="joystick-base"><div id="joystick-stick"></div></div>
@@ -280,12 +262,11 @@
 
     let flags = { calSpawned: false, dogSpawned: false, tasSpawned: false, lastMiniBoss: 0 };
 
-    // 💡 쿨타임 스케일링 전용 함수 (파괴력에 의한 쿨타임 증가를 정확하게 연산)
     function getBaseRate(frLvl, dmgLvl) {
         let rate = 350;
         rate /= Math.pow(1.25, Math.min(5, frLvl));
         if (frLvl > 5) rate /= Math.pow(1.5, frLvl - 5);
-        if (dmgLvl >= 6) rate *= Math.pow(2, dmgLvl - 5); // 파괴력 6렙부터 2배씩 쿨타임 증가
+        if (dmgLvl >= 6) rate *= Math.pow(2, dmgLvl - 5);
         return Math.max(10, rate);
     }
 
@@ -322,7 +303,14 @@
         document.getElementById('pause-screen').style.display = isManualPaused ? 'flex' : 'none';
         if(!isManualPaused) { lastTimestamp = performance.now(); } 
     }
+    
     document.getElementById('pause-btn').onclick = togglePause;
+    
+    // 💡 모바일 일시정지 해제 가능하도록 설정
+    document.getElementById('pause-screen').addEventListener('click', (e) => {
+        if (e.target.id === 'go-main-btn') return;
+        togglePause();
+    });
 
     document.getElementById('go-main-btn').addEventListener('click', () => { location.reload(); });
 
@@ -391,7 +379,7 @@
         damage: { icon: '💥', name: '파괴력', desc: '대미지가 크게 증가합니다.', evName: '파멸', evDesc: '대미지가 대폭발합니다. (무한 중첩)<br>단, 진화 시점부터 공격 속도가 반감됩니다.' },
         multishot: { icon: '🔫', name: '멀티샷', desc: '총알 발사 수가 증가합니다.', evName: '탄막 융합', evDesc: '발사 수가 대폭 늘어납니다.<br>집탄률은 하락합니다.' },
         allInOne: { icon: '🌌', name: '올인원', desc: '총알을 하나로 뭉쳐 대미지를 압축합니다.', evName: '빅뱅', evDesc: '멀티샷을 0으로 되돌리고 대미지를 영구적으로 압축시킵니다.' },
-        firerate: { icon: '⚡', name: '신속 사격', desc: '공격 쿨타임이 대폭 감소합니다.', evName: '광속 사격', evDesc: '공격 속도가 극대화됩니다.<br>단, 대미지와 총알 크기가 감소합니다.' },
+        firerate: { icon: '⚡', name: '신속 사격', desc: '공격 쿨타임이 대폭 감소합니다.', evName: '광속 사격', evDesc: '공격 속도가 극대화됩니다.' },
         speed: { icon: '👟', name: '기동성', desc: '이동 속도가 상승합니다.', evName: '위상 이동', evDesc: '이동 속도가 대폭 상승합니다.<br>이동 시 잔상 이펙트 추가.' },
         pierce: { icon: '🏹', name: '관통 사격', desc: '적을 다수 관통합니다.', evName: '유령 관통', evDesc: '관통 횟수가 폭발하며, 관통 시 대미지가 감소하지 않고 증가합니다.' },
         homing: { icon: '🎯', name: '유도탄', desc: '적을 정밀하게 쫓아갑니다.', evName: '점근선 유도', evDesc: '유도 성능이 극대화됩니다.' },
@@ -457,14 +445,23 @@
         if (dmgLvl >= 6) {
             currentDamage *= Math.pow(1.5, dmgLvl - 5); 
         }
-        if (curFRLevel >= 5) currentDamage *= 0.5; 
+        
+        // 💡 신속 대미지 반감 삭제됨
         
         let bounceLvl = player.skills.bounce || 0;
         if (bounceLvl >= 5) {
             currentDamage *= Math.pow(0.8, bounceLvl - 4);
         }
 
-        let totalShots = 1 + Math.floor((player.skills.multishot || 0) * Math.pow(1.2, player.skills.multishot || 0));
+        // 💡 멀티샷 선형 및 점진 증가 적용
+        let multiLvl = player.skills.multishot || 0;
+        let totalShots = 1 + multiLvl; // 1, 2, 3, 4 선형 증가
+        if (multiLvl >= 5) {
+            totalShots = 5; 
+            for(let i=5; i<=multiLvl; i++) {
+                totalShots += (i - 3); // 5렙=+2, 6렙=+3, 7렙=+4... 점진 증가
+            }
+        }
         
         if ((player.skills.allInOne || 0) > 0) {
             totalShots = 1;
@@ -512,7 +509,7 @@
     function checkLevelUp() {
         while (score >= nextLevelScore) {
             levelCount++; 
-            nextLevelScore += 500 + ((levelCount - 1) * 100); 
+            nextLevelScore += 1000; 
             availableDraws++;
             playSound(600, 'sine', 0.2, 0.1); playSound(800, 'sine', 0.3, 0.1); 
         }
@@ -538,7 +535,7 @@
         let weightedPool = [];
         abilityPool.forEach(ab => {
             let level = player.skills[ab.id] || 0;
-            if (ab.id === 'allInOne' && (player.skills.multishot || 0) < 10) return;
+            if (ab.id === 'allInOne' && (player.skills.multishot || 0) < 5) return;
             
             let weight = Math.max(5, 100 - (level * 15));
             if(ab.id === 'heal') weight = 50; 
@@ -590,7 +587,11 @@
                 let c = 4.5 * Math.pow(1.15, curLvl) * 1.3; let n = 4.5 * Math.pow(1.15, nextLvl) * 1.3;
                 statText = `이동속도: ${c.toFixed(1)} ➔ ${n.toFixed(1)} <span style="color:#2ecc71">(+${(n-c).toFixed(1)})</span>`;
             } else if (ab.id === 'multishot') {
-                let c = 1 + Math.floor(curLvl * Math.pow(1.2, curLvl)); let n = 1 + Math.floor(nextLvl * Math.pow(1.2, nextLvl));
+                // 💡 멀티샷 선형 및 점진 증가 반영 UI
+                let c = 1 + curLvl;
+                if(curLvl >= 5) { c = 5; for(let i=5; i<=curLvl; i++) c += (i-3); }
+                let n = 1 + nextLvl;
+                if(nextLvl >= 5) { n = 5; for(let i=5; i<=nextLvl; i++) n += (i-3); }
                 statText = `발사 수: ${c} ➔ ${n} <span style="color:#2ecc71">(+${n-c})</span>`;
             } else if (ab.id === 'maxHp') {
                 let n = Math.floor(20 * Math.pow(1.3, curLvl)); 
@@ -602,20 +603,30 @@
             } else if (ab.id === 'pet') {
                 statText = `마리 수: ${curLvl} ➔ ${nextLvl} <span style="color:#2ecc71">(+1)</span>`;
             } else if (ab.id === 'bounce') {
-                let c = Math.floor(curLvl * Math.pow(1.5, curLvl)); let n = Math.floor(nextLvl * Math.pow(1.5, nextLvl));
+                // 💡 도탄 선형 증가 적용
+                let c = curLvl; let n = nextLvl;
                 if (nextLvl >= 5) {
                     statText = `과부하 임계치 x${Math.pow(1.1, nextLvl - 4).toFixed(2)}, 도탄 횟수: ${c} ➔ ${n}`;
                 } else { statText = `도탄 횟수: ${c} ➔ ${n} (도탄 시 성능 반감)`; }
             } else if (ab.id === 'pierce') {
-                let c = Math.floor(curLvl * Math.pow(1.5, curLvl)); let n = Math.floor(nextLvl * Math.pow(1.5, nextLvl));
+                // 💡 관통 선형 증가 적용
+                let c = curLvl; let n = nextLvl;
                 if (nextLvl >= 5) {
                     statText = `과부하 임계치 x${Math.pow(1.1, nextLvl - 4).toFixed(2)}, 관통 횟수: ${c} ➔ ${n}`;
                 } else { statText = `관통 횟수: ${c} ➔ ${n} (관통 시 성능 반감)`; }
             } else if (ab.id === 'allInOne') {
-                let m = 1 + Math.floor((player.skills.multishot||0) * Math.pow(1.2, (player.skills.multishot||0)));
+                let m = 1 + (player.skills.multishot||0);
+                if((player.skills.multishot||0) >= 5) { m = 5; for(let i=5; i<=(player.skills.multishot||0); i++) m += (i-3); }
                 let currentMult = (player.allInOneMultiplier || 1) * Math.pow(1.2, Math.max(0, curLvl - 1));
                 let nextMult = (curLvl === 0 ? (m * 0.8) : player.allInOneMultiplier) * Math.pow(1.2, nextLvl - 1);
                 statText = `현재 배율 x${currentMult.toFixed(1)} ➔ x${nextMult.toFixed(1)}`;
+            } else if (ab.id === 'size') {
+                let c = 5 + (curLvl * 3); let n = 5 + (nextLvl * 3);
+                statText = `총알 크기: ${c} ➔ ${n} <span style="color:#2ecc71">(+3)</span>`;
+            } else if (ab.id === 'dashCooldown') {
+                let c = Math.max(0.1, 1.5 - (curLvl * 0.25));
+                let n = Math.max(0.1, 1.5 - (nextLvl * 0.25));
+                statText = `쿨타임: ${c.toFixed(2)}s ➔ ${n.toFixed(2)}s <span style="color:#2ecc71">(-0.25s)</span>`;
             } else if (ab.id === 'heal') {
                 statText = `즉시 체력 40 회복`;
             } else {
@@ -644,7 +655,8 @@
                     player.maxHp += inc; player.hp += inc; player.skills.maxHp++; 
                 }
                 else if (ab.id === 'allInOne') {
-                    let m = 1 + Math.floor((player.skills.multishot||0) * Math.pow(1.2, (player.skills.multishot||0)));
+                    let m = 1 + (player.skills.multishot||0);
+                    if((player.skills.multishot||0) >= 5) { m = 5; for(let i=5; i<=(player.skills.multishot||0); i++) m += (i-3); }
                     player.allInOneMultiplier = (player.allInOneMultiplier || 1) * (m * 0.8);
                     player.skills.multishot = 0; 
                     player.skills.allInOne++; 
@@ -652,9 +664,18 @@
                 }
                 else { 
                     player.skills[ab.id]++; 
-                    if(player.skills[ab.id] === 5 && ab.evName) {
+                    if(player.skills[ab.id] === 5 && ab.evName && ab.id !== 'bounce') {
                         showDialogue(`${ab.name} 스킬 진화!`, 2000);
                     }
+                }
+
+                let isMax = false;
+                if (ab.id === 'bounce' && player.skills[ab.id] === 7) isMax = true;
+                else if (ab.id !== 'bounce' && player.skills[ab.id] === 5) isMax = true;
+
+                if (isMax && ab.id !== 'heal') {
+                    availableDraws += 2;
+                    showDialogue(`${ab.name} 마스터! (보너스 뽑기 +2)`, 3000);
                 }
                 
                 updateSkillUI(); updatePlayerStatsUI();
@@ -678,12 +699,9 @@
         if (e.code === 'Space' && dashCooldown <= 0 && gameActive && !isPaused && !isManualPaused && player.debuffs.extremeGravity <= 0) triggerDash();
         if (e.code === 'KeyE' && gameActive) toggleAutoFire();
         if (e.code === 'Digit2' && gameActive) { toggleSpeed(); }
-        // 💡 단축키 기능
         if (e.code === 'KeyR' && gameActive && !isPaused && !isManualPaused) {
-            bullets = [];
-            laserWarnings = [];
-            playSound(500, 'square', 0.2, 0.1);
-            showDialogue("탄막 소거!", 1000);
+            bullets = []; laserWarnings = [];
+            playSound(500, 'square', 0.2, 0.1); showDialogue("탄막 소거!", 1000);
         }
         if (e.code === 'KeyF' && gameActive && !isPaused && !isManualPaused && availableDraws > 0) {
             playSound(400, 'triangle', 0.1, 0.1);
@@ -727,8 +745,8 @@
         if (dashCooldown <= 0 && player.debuffs.extremeGravity <= 0) {
             playSound(300, 'triangle', 0.2, 0.2); 
             isDashing = true; dashTime = 0.2 + ((player.skills.dashBoost || 0) * 0.05); 
-            let baseDashCool = 3.0 * Math.pow(0.7, (player.skills.dashCooldown || 0) + (player.skills.dashBoost || 0)); 
-            dashCooldown = Math.max(0.1, baseDashCool); 
+            let baseDashCool = 1.5 - ((player.skills.dashCooldown || 0) * 0.25); 
+            dashCooldown = Math.max(0.1, baseDashCool - ((player.skills.dashBoost || 0) * 0.1)); 
             player.iFrames = 0.3 + ((player.skills.dashBoost || 0) * 0.1); 
         }
     }
@@ -741,7 +759,7 @@
         let curFRLevel = player.skills.firerate || 0;
         let dmgLvl = player.skills.damage || 0;
         
-        let baseRate = getBaseRate(curFRLevel, dmgLvl);
+        let baseRate = getBaseRate(curFRLevel, dmgLvl); 
         let currentDamage = 25 * Math.pow(1.5, Math.min(5, dmgLvl)); 
         
         if (dmgLvl >= 6) {
@@ -749,21 +767,26 @@
             currentDamage *= Math.pow(1.5, overLvl);
         }
         
-        let baseRadius = 5 * Math.pow(1.25, player.skills.size || 0);
+        let baseRadius = 5 + ((player.skills.size || 0) * 3);
         baseRadius *= Math.pow(0.85, curFRLevel); 
         
         let baseSpeed = 12 * Math.pow(1.1, curFRLevel); 
         let spreadMult = Math.max(0.05, 0.15 * Math.pow(0.9, player.skills.multishot || 0)); 
         
-        let totalShots = 1 + Math.floor((player.skills.multishot || 0) * Math.pow(1.2, player.skills.multishot || 0));
+        let multiLvl = player.skills.multishot || 0;
+        let totalShots = 1 + multiLvl;
+        if (multiLvl >= 5) {
+            totalShots = 5; 
+            for(let i=5; i<=multiLvl; i++) totalShots += (i - 3); 
+        }
 
         let bounceLvl = player.skills.bounce || 0;
-        let bounceCount = Math.floor(bounceLvl * Math.pow(1.5, bounceLvl));
+        let bounceCount = bounceLvl;
 
         let pierceLvl = player.skills.pierce || 0;
-        let pierceCount = Math.floor(pierceLvl * Math.pow(1.5, pierceLvl));
+        let pierceCount = pierceLvl;
 
-        if (curFRLevel >= 5) currentDamage *= 0.5; 
+        // 💡 신속 대미지 감소 삭제됨
         if (bounceLvl >= 5) {
             currentDamage *= Math.pow(0.8, bounceLvl - 4);
         }
@@ -876,7 +899,8 @@
             y: Math.random() * canvas.height,
             radius: 30, type: 'miniboss', hp: hp, maxHp: hp,
             color: '#8e44ad', hitFlash: 0, timer: 0, 
-            baseScore: 1000 * difficultyLevel, targetedBy: 0, speedFactor: 1.2, damageMult: 2.0
+            baseScore: 1000, // 💡 미니보스 경험치 버그 수정 (고정 점수)
+            targetedBy: 0, speedFactor: 1.2, damageMult: 2.0
         });
     }
 
@@ -903,7 +927,7 @@
             let oldestIdx = bullets.findIndex(b => !b.fromPlayer);
             if(oldestIdx !== -1) bullets.splice(oldestIdx, 1);
         }
-        let finalDmg = damage * Math.pow(1.4, Math.max(0, Math.floor(gameTime/60))); 
+        let finalDmg = damage * Math.pow(1.5, Math.max(0, Math.floor(gameTime/50))); 
         bullets.push({ x, y, radius, color, fromPlayer: false, damage: finalDmg, stationary: false, hitEnemies: [], velocity: { x: Math.cos(angle)*speed, y: Math.sin(angle)*speed }, bounceLeft: 0, pierceLeft: 0, ...props });
     }
 
@@ -944,8 +968,7 @@
             hp *= isHardMode ? Math.pow(2.5, periods) : Math.pow(2, periods);
             if (gameTime >= 120) hp *= 10; 
 
-            let damageMult = Math.pow(1.4, periods);
-            
+            let damageMult = Math.pow(1.5, periods);
             let scoreScaling = isHardMode ? 1.5 : 1.0;
             let finalBaseScore = Math.floor(scoreValue * scoreScaling);
             
@@ -1067,20 +1090,18 @@
             }
             if (dashTime <= 0) isDashing = false;
         }
-        
+
+        // 💡 타즈메니아 펫 너프 반영
         if (player.skills.pet > 0) {
             while (myPets.length < player.skills.pet) { myPets.push({ x: player.x, y: player.y, timer: 0 }); }
             
-            let targetedByPets = []; 
-            
             myPets.forEach((pet, idx) => {
-                let target = getSmartNearestEnemy(pet.x, pet.y, targetedByPets);
-                if (!target) target = getSmartNearestEnemy(pet.x, pet.y); 
+                let target = getSmartNearestEnemy(pet.x, pet.y);
                 
-                let petSpeed = 10 * Math.pow(1.2, player.skills.speed||0) * speedMult;
+                // 속도 절반으로 너프
+                let petSpeed = (10 * Math.pow(1.2, player.skills.speed||0) * speedMult) / 2;
+                
                 if (target) {
-                    targetedByPets.push(target); 
-                    
                     let targetX = target.x + Math.cos((Date.now()/500) + (Math.PI*2/myPets.length)*idx) * (target.radius + 15);
                     let targetY = target.y + Math.sin((Date.now()/500) + (Math.PI*2/myPets.length)*idx) * (target.radius + 15);
                     let ang = Math.atan2(targetY - pet.y, targetX - pet.x);
@@ -1091,7 +1112,8 @@
                     if (Math.hypot(target.x - pet.x, target.y - pet.y) < 30 + target.radius) {
                         let petCooldown = Math.max(0.05, 0.8 * Math.pow(0.8, player.skills.firerate||0));
                         if (pet.timer > petCooldown) { 
-                            let petDmg = 50 * Math.pow(1.5, player.skills.damage||0) * pDmgMultiplier;
+                            // 대미지 절반으로 너프
+                            let petDmg = (50 * Math.pow(1.5, player.skills.damage||0) * pDmgMultiplier) / 2;
                             target.hp -= petDmg;
                             target.hitFlash = 4;
                             if(particles.length < 300) createParticles(target.x, target.y, '#e67e22', 10);
@@ -1138,6 +1160,40 @@
         }
         player.x = Math.max(15, Math.min(canvas.width - 15, player.x)); player.y = Math.max(15, Math.min(canvas.height - 15, player.y));
 
+        if (player.skills.orbital > 0) {
+            let actualOrbital = player.skills.orbital;
+            if(actualOrbital > 0) {
+                let evOrb = actualOrbital >= 5;
+                let count = 1 + Math.floor(actualOrbital * (evOrb?2:1)); 
+                let oRadius = (70 + (actualOrbital * 20)) * 2; 
+                let oSpeed = globalTime * 3; 
+                for(let i=0; i<count; i++) {
+                    let angle = oSpeed + (Math.PI * 2 / count) * i;
+                    let ox = player.x + Math.cos(angle) * oRadius;
+                    let oy = player.y + Math.sin(angle) * oRadius;
+                    
+                    enemies.forEach(e => {
+                        if (Math.hypot(e.x - ox, e.y - oy) < 15 + e.radius) {
+                            if (Date.now() - (e.lastOrbitalHit||0) > 400) {
+                                let dmg = 15 * Math.pow(1.5, player.skills.damage||0) * Math.pow(1.2, actualOrbital) * pDmgMultiplier; 
+                                
+                                let critChance = player.skills.crit >= 5 ? Math.min(1.0, 0.05 + (player.skills.crit - 5) * 0.01) : Math.min(1.0, (player.skills.crit||0) * 0.1);
+                                if (Math.random() < critChance) {
+                                    if (player.skills.crit >= 5) { dmg *= 50 * Math.pow(1.1, player.skills.crit - 5); e.hitFlash = 10; } 
+                                    else { dmg *= 2; }
+                                }
+                                
+                                e.hp -= dmg; e.lastOrbitalHit = Date.now();
+                                if(particles.length < 300) createParticles(e.x, e.y, '#f39c12', 5);
+                                if(Date.now() - lastHitSoundTime > 50) { playSound(150, 'sawtooth', 0.05, 0.05); lastHitSoundTime = Date.now(); }
+                                if (e.hp <= 0 && !e.isSegment) handleEnemyDeath(e);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
         for(let i=laserWarnings.length-1; i>=0; i--) {
             let l = laserWarnings[i]; l.timer += deltaTime;
             if (l.timer > 1.5 && l.timer < 1.6 && player.iFrames <= 0) {
@@ -1182,6 +1238,18 @@
                 }
             }
             
+            if (!b.fromPlayer && b.homingLvl > 0 && !b.stationary) {
+                let baseAngle = Math.atan2(player.y - b.y, player.x - b.x);
+                const turnRate = 0.015 * b.homingLvl;
+                b.velocity.x += Math.cos(baseAngle) * turnRate; 
+                b.velocity.y += Math.sin(baseAngle) * turnRate;
+                const speed = Math.hypot(b.velocity.x, b.velocity.y);
+                if(speed > 0.001) {
+                    b.velocity.x = (b.velocity.x / speed) * b.baseSpeed; 
+                    b.velocity.y = (b.velocity.y / speed) * b.baseSpeed;
+                }
+            }
+
             if (b.fromPlayer && b.homingLvl > 0 && !b.stationary) {
                 if (!b.currentTarget || b.currentTarget.dead) {
                     b.currentTarget = getSmartNearestEnemy(b.x, b.y, b.hitEnemies);
@@ -1270,6 +1338,13 @@
                 if (hpPct <= 0.76) e.speedMult += 0.2; if (hpPct <= 0.68) e.speedMult += 0.2;
                 if (e.phase === 2) e.speedMult += 0.5; 
 
+                // 💡 신먹자 머리 탄막 발사 로직 (1페이즈, 2페이즈 공통)
+                if (e.timer % 0.8 < 0.05) {
+                    spawnBulletEnemy(e.x, e.y, angleToPlayer, 6, '#00ffff', 8, 15);
+                    spawnBulletEnemy(e.x, e.y, angleToPlayer + 0.3, 6, '#00ffff', 8, 15);
+                    spawnBulletEnemy(e.x, e.y, angleToPlayer - 0.3, 6, '#00ffff', 8, 15);
+                }
+
                 if (hpPct <= 0.6 && e.phase === 1) {
                     e.phase = 2; e.state = 'portal_in'; e.timer = 0; e.invincible = true;
                     showDialogue("신들의 포식자가 진정한 모습을 드러냅니다...", 4000);
@@ -1281,13 +1356,22 @@
                         e.invincible = true; e.dashAngle = angleToPlayer;
                         if (e.timer > 2.0) { e.state = 'blue'; e.timer = 0; e.invincible = false; }
                     } else if (e.state === 'blue') {
-                        player.debuffs.distorted = 0.5; let tx = player.x, ty = player.y;
+                        player.debuffs.distorted = 0.5; 
+                        
+                        // 💡 신먹자 맵 밖 이탈 방지 로직 (화면 중앙 방향 보정)
+                        let tx = player.x; let ty = player.y;
+                        if (e.x < 0 || e.x > canvas.width || e.y < 0 || e.y > canvas.height) {
+                            tx = canvas.width / 2; ty = canvas.height / 2;
+                        }
+                        
                         e.x += (tx - e.x) * 0.015 * e.speedMult; e.y += (ty - e.y) * 0.015 * e.speedMult;
                         if (hpPct <= 0.75 && e.timer - e.attackTimer > 1.2) { spawnBulletEnemy(e.x, e.y, angleToPlayer, 8, '#3498db', 8, 20); e.attackTimer = e.timer; }
                         if (e.timer > 8) { e.state = 'magenta'; e.timer = 0; }
                     } else if (e.state === 'magenta') {
                         if (e.timer < 0.1) e.dashAngle = angleToPlayer; 
-                        e.x += Math.cos(e.dashAngle) * 12 * e.speedMult; e.y += Math.sin(e.dashAngle) * 12 * e.speedMult;
+                        
+                        // 💡 돌진 속도 너프 (12 -> 8)
+                        e.x += Math.cos(e.dashAngle) * 8 * e.speedMult; e.y += Math.sin(e.dashAngle) * 8 * e.speedMult;
                         if (e.timer % (isHardMode?0.1:0.2) < 0.05) spawnBulletEnemy(e.x, e.y, Math.random() * Math.PI * 2, 6, '#e84393', 8, 20);
 
                         if (e.timer > 6) { e.state = 'purple'; e.timer = 0; e.attackTimer = 0; }
@@ -1321,13 +1405,16 @@
                         } 
                         else if (e.timer > 0.5 && e.timer < 0.6 && !e.aimed) { e.invincible = false; e.dashAngle = angleToPlayer; e.aimed = true; } 
                         else if (e.timer > 0.6 && e.timer < 1.5) { 
-                            e.x += Math.cos(e.dashAngle)*20; e.y += Math.sin(e.dashAngle)*20; 
+                            // 💡 돌진 속도 너프 (20 -> 14)
+                            e.x += Math.cos(e.dashAngle)*14; e.y += Math.sin(e.dashAngle)*14; 
                             if (e.timer % 0.1 < 0.05) spawnBulletEnemy(e.x, e.y, Math.random()*Math.PI*2, 6, '#3498db', 8, 20);
                         }
-                        if (e.timer > 2) { e.timer = 0; e.teleportStep++; e.teleported = false; e.aimed = false; if(e.teleportStep >= 3) e.state = 'purple_enhanced'; }
+                        // 💡 2페이즈 돌진 횟수 증가 (3회 -> 5회)
+                        if (e.timer > 2) { e.timer = 0; e.teleportStep++; e.teleported = false; e.aimed = false; if(e.teleportStep >= 5) e.state = 'purple_enhanced'; }
                     } else if (e.state === 'magenta') {
                         if (e.timer < 0.1) e.dashAngle = angleToPlayer;
-                        e.x += Math.cos(e.dashAngle) * 15; e.y += Math.sin(e.dashAngle) * 15;
+                        // 💡 돌진 속도 너프 (15 -> 10)
+                        e.x += Math.cos(e.dashAngle) * 10; e.y += Math.sin(e.dashAngle) * 10;
                         if (e.timer % 0.15 < 0.05) {
                             for(let i=0; i<3; i++) spawnBulletEnemy(e.x, e.y, e.dashAngle + (Math.PI/2) + (i*0.5), 7, '#e84393', 8, 20);
                             for(let i=0; i<3; i++) spawnBulletEnemy(e.x, e.y, e.dashAngle - (Math.PI/2) - (i*0.5), 7, '#e84393', 8, 20);
@@ -1393,15 +1480,6 @@
                         if (isHardMode) createLaserBarrier('norman_snipe', e.x, e.y, angleToPlayer);
                         e.timer = 0; 
                     }
-                }
-            }
-            else if (e.type === 'miniboss') {
-                e.timer += deltaTime;
-                e.x += Math.cos(angleToPlayer) * 1.5 * e.speedFactor; 
-                e.y += Math.sin(angleToPlayer) * 1.5 * e.speedFactor;
-                if (e.timer > 2.0) {
-                    for(let i=0; i<8; i++) spawnBulletEnemy(e.x, e.y, (Math.PI*2/8)*i + e.timer, 5, '#8e44ad', 15, 30);
-                    e.timer = 0;
                 }
             }
             else if (e.type === 'tasmanian') {
@@ -1716,6 +1794,11 @@
                     ctx.lineWidth = 3; ctx.strokeStyle = '#e74c3c'; ctx.stroke(); 
                     ctx.restore();
                     
+                } else if (e.type === 'brother') {
+                    ctx.save(); ctx.translate(ex, ey); ctx.shadowBlur = 15; ctx.shadowColor = e.color;
+                    ctx.beginPath(); ctx.arc(0, 0, safeR, 0, Math.PI*2); ctx.fillStyle = e.hitFlash > 0 ? '#fff' : e.color; ctx.fill();
+                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-10, -5, 5, 0, Math.PI*2); ctx.arc(10, -5, 5, 0, Math.PI*2); ctx.fill();
+                    ctx.restore();
                 } else if (e.type === 'tasmanian') {
                     ctx.save(); ctx.translate(ex, ey); ctx.shadowBlur = 15; ctx.shadowColor = '#cd853f';
                     ctx.beginPath(); ctx.arc(0, 0, safeR, 0, Math.PI*2); ctx.fillStyle = e.hitFlash > 0 ? '#fff' : '#cd853f'; ctx.fill();
@@ -1736,11 +1819,6 @@
                     
                     ctx.fillStyle = '#2d3436'; ctx.beginPath(); ctx.moveTo(safeR, -safeR*0.6); ctx.lineTo(safeR*1.5, -safeR*0.2); ctx.lineTo(safeR, 0); ctx.fill();
                     ctx.beginPath(); ctx.moveTo(safeR, safeR*0.6); ctx.lineTo(safeR*1.5, safeR*0.2); ctx.lineTo(safeR, 0); ctx.fill();
-                    ctx.restore();
-                } else if (e.type === 'brother') {
-                    ctx.save(); ctx.translate(ex, ey); ctx.shadowBlur = 15; ctx.shadowColor = e.color;
-                    ctx.beginPath(); ctx.arc(0, 0, safeR, 0, Math.PI*2); ctx.fillStyle = e.hitFlash > 0 ? '#fff' : e.color; ctx.fill();
-                    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-10, -5, 5, 0, Math.PI*2); ctx.arc(10, -5, 5, 0, Math.PI*2); ctx.fill();
                     ctx.restore();
                 } else if (e.type === 'miniboss') {
                     ctx.save(); ctx.translate(ex, ey); ctx.shadowBlur = 15; ctx.shadowColor = e.color;
@@ -1813,3 +1891,4 @@
 </script>
 </body>
 </html>
+
