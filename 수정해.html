@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>입자 연구소: 코스믹 제로</title>
+    <style>
+        :root {
+            --bg: #0a0b10;
+            --card: #161821;
+            --primary: #4f46e5;
+            --accent: #00f2ff;
+            --text: #f8fafc;
+            --danger: #ef4444;
+        }
+
+        body {
+            margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg); color: var(--text); overflow: hidden; height: 100vh;
+        }
+
+        /* 모바일 레이아웃 구성 */
+        #app {
+            display: flex; flex-direction: column; height: 100vh;
+        }
+
+        header {
+            padding: 15px; background: var(--card); border-bottom: 2px solid #2d3042; text-align: center;
+        }
+
+        .stats-main { font-size: 1.8rem; font-weight: 800; color: var(--accent); margin-bottom: 5px; }
+        .stats-sub { font-size: 0.9rem; color: #94a3b8; }
+
+        /* 메인 영역 및 하단 탭 */
+        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 80px; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        nav {
+            position: fixed; bottom: 0; width: 100%; height: 65px;
+            background: var(--card); border-top: 1px solid #2d3042;
+            display: flex; justify-content: space-around; align-items: center;
+        }
+
+        .nav-item { flex: 1; text-align: center; font-size: 0.8rem; color: #64748b; padding: 10px 0; }
+        .nav-item.active { color: var(--accent); font-weight: bold; border-top: 2px solid var(--accent); }
+
+        /* 클릭 노드 (모바일 중앙) */
+        .click-container {
+            height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #core-node {
+            width: 160px; height: 160px; border-radius: 50%;
+            background: radial-gradient(circle, var(--primary), #000);
+            box-shadow: 0 0 30px var(--primary); border: none;
+            color: white; font-weight: bold; font-size: 1.1rem;
+            transition: transform 0.05s; touch-action: manipulation;
+        }
+        #core-node:active { transform: scale(0.95); }
+
+        /* 상점 및 리스트 디자인 */
+        .item-card {
+            background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #2d3042;
+        }
+        .item-card.locked { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
+        .item-info b { display: block; font-size: 1.05rem; color: var(--accent); }
+        .item-info span { font-size: 0.8rem; color: #94a3b8; }
+        .buy-btn { background: var(--primary); border: none; color: white; padding: 8px 15px; border-radius: 6px; font-weight: bold; }
+
+        /* 마일스톤 스타일 */
+        .milestone-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #64748b;
+        }
+        .milestone-card.achieved { border-left-color: #22c55e; }
+        .milestone-tag { font-size: 0.7rem; background: #334155; padding: 2px 6px; border-radius: 4px; float: right; }
+
+        /* 프로그레스 바 */
+        .progress-container { margin: 20px 0; background: #1e293b; border-radius: 10px; height: 10px; overflow: hidden; }
+        #progress-fill { background: var(--accent); width: 0%; height: 100%; transition: width 0.3s; }
+
+        /* 경고 및 알림 */
+        #msg-log { font-size: 0.8rem; color: #94a3b8; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <header>
+        <div id="p-count" class="stats-main">0</div>
+        <div class="stats-sub">PPS: <span id="p-pps">0</span> (감쇄율: <span id="p-dil">0%</span>)</div>
+    </header>
+
+    <main>
+        <section id="tab-lab" class="tab-content active">
+            <div class="click-container">
+                <button id="core-node">입자 추출</button>
+                <div id="msg-log">가속기가 준비되었습니다.</div>
+            </div>
+            <div class="progress-container">
+                <div id="progress-fill"></div>
+            </div>
+            <div style="text-align: center; font-size: 0.8rem;">코스믹 제로까지: <span id="progress-val">0</span>%</div>
+        </section>
+
+        <section id="tab-shop" class="tab-content">
+            <div id="building-list"></div>
+        </section>
+
+        <section id="tab-miles" class="tab-content">
+            <h3>우주적 달성 기록</h3>
+            <div id="milestone-list"></div>
+        </section>
+    </main>
+
+    <nav>
+        <div class="nav-item active" onclick="switchTab('lab', this)">🔬 연구실</div>
+        <div class="nav-item" onclick="switchTab('shop', this)">🏭 시설</div>
+        <div class="nav-item" onclick="switchTab('miles', this)">🏆 기록</div>
+    </nav>
+</div>
+
+<script>
+    // 1. 게임 엔진 상태
+    const state = {
+        particles: 0,
+        totalParticles: 0,
+        pps: 0,
+        clickPower: 1,
+        dilationPower: 0.9,
+        goal: 1e33,
+        lastSave: Date.now(),
+        milestonesAchieved: []
+    };
+
+    const buildings = [
+        { id: 0, name: "초소형 가속기", cost: 15, pps: 0.8, count: 0, desc: "원자를 가볍게 쪼갭니다." },
+        { id: 1, name: "양자 수집기", cost: 150, pps: 6, count: 0, desc: "양자 거품에서 입자를 낚습니다." },
+        { id: 2, name: "항성 융합로", cost: 2000, pps: 45, count: 0, desc: "별의 핵을 모사하여 에너지를 얻습니다." },
+        { id: 3, name: "차원 균열기", cost: 35000, pps: 400, count: 0, desc: "공간을 찢어 입자를 쏟아냅니다." },
+        { id: 4, name: "은하 농축기", cost: 8e5, pps: 6500, count: 0, desc: "은하 전체의 질량을 입자로 바꿉니다." },
+        { id: 5, name: "암흑 물질 엔진", cost: 2e7, pps: 90000, count: 0, desc: "보이지 않는 힘을 제어합니다." },
+        { id: 6, name: "코스믹 스트링", cost: 5e9, pps: 1.2e6, count: 0, desc: "우주의 뼈대를 진동시킵니다." },
+        { id: 7, name: "오메가 코어", cost: 1e12, pps: 8e8, count: 0, desc: "현실의 법칙을 무시하기 시작합니다." }
+    ];
+
+    const milestones = [
+        { id: 'm1', name: "양자 터널링 해금", target: 1e9, desc: "자동 클릭 기능 활성화 (1초당 5회)", type: "unlock" },
+        { id: 'm2', name: "고효율 필터링", target: 1e15, desc: "감쇄율 완화 (0.9 -> 0.92)", type: "buff" },
+        { id: 'm3', name: "암흑 에너지 엔진", target: 1e24, desc: "모든 PPS 생산량 100배", type: "buff" },
+        { id: 'm4', name: "코스믹 제로", target: 1e33, desc: "새로운 우주의 탄생", type: "end" }
+    ];
+
+    // 2. 유틸리티 함수
+    function format(n) {
+        if (n < 1e6) return Math.floor(n).toLocaleString();
+        return n.toExponential(3).replace("+", "");
+    }
+
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        el.classList.add('active');
+    }
+
+    // 3. 핵심 로직: 감쇄(Dilation) 및 업데이트
+    function update() {
+        // PPS 계산
+        let rawPPS = 0;
+        buildings.forEach(b => rawPPS += b.pps * b.count);
+        
+        // 마일스톤 버프 적용
+        if (state.milestonesAchieved.includes('m3')) rawPPS *= 100;
+        if (state.milestonesAchieved.includes('m2')) state.dilationPower = 0.92;
+
+        // 감쇄 적용 (1e10 이상부터)
+        let finalPPS = rawPPS;
+        let dilRate = 0;
+        if (rawPPS > 1e10) {
+            finalPPS = Math.pow(rawPPS / 1e10, state.dilationPower) * 1e10;
+            dilRate = (1 - (finalPPS / rawPPS)) * 100;
+        }
+
+        state.pps = finalPPS;
+        state.particles += finalPPS / 20; // 0.05초마다 업데이트
+        state.totalParticles = Math.max(state.totalParticles, state.particles);
+
+        // 자동 클릭 마일스톤 (m1)
+        if (state.milestonesAchieved.includes('m1')) {
+            state.particles += (state.clickPower * 5) / 20;
+        }
+
+        // UI 갱신
+        document.getElementById('p-count').innerText = format(state.particles);
+        document.getElementById('p-pps').innerText = format(finalPPS) + "/s";
+        document.getElementById('p-dil').innerText = dilRate.toFixed(1) + "%";
+        
+        const prog = (Math.log10(state.particles + 1) / Math.log10(state.goal)) * 100;
+        document.getElementById('progress-fill').style.width = Math.min(prog, 100) + "%";
+        document.getElementById('progress-val').innerText = Math.min(prog, 100).toFixed(4);
+
+        checkMilestones();
+        renderShop();
+        renderMilestones();
+    }
+
+    function checkMilestones() {
+        milestones.forEach(m => {
+            if (!state.milestonesAchieved.includes(m.id) && state.particles >= m.target) {
+                state.milestonesAchieved.push(m.id);
+                document.getElementById('msg-log').innerText = `[해금] ${m.name}!`;
+                document.getElementById('msg-log').style.color = 'var(--accent)';
+            }
+        });
+    }
+
+    function renderShop() {
+        const list = document.getElementById('building-list');
+        buildings.forEach((b, i) => {
+            let el = document.getElementById(`b-${i}`);
+            if (!el) {
+                el = document.createElement('div');
+                el.id = `b-${i}`;
+                el.className = 'item-card';
+                list.appendChild(el);
+            }
+            
+            const locked = i > 0 && buildings[i-1].count === 0 && state.particles < b.cost * 0.5;
+            el.className = `item-card ${locked ? 'locked' : ''}`;
+            el.innerHTML = `
+                <div class="item-info">
+                    <b>${b.name} (${b.count})</b>
+                    <span>${b.desc}</span>
+                    <small>가격: ${format(b.cost)}</small>
+                </div>
+                <button class="buy-btn" onclick="buy(${i})">구매</button>
+            `;
+        });
+    }
+
+    function renderMilestones() {
+        const list = document.getElementById('milestone-list');
+        list.innerHTML = '';
+        milestones.forEach(m => {
+            const achieved = state.milestonesAchieved.includes(m.id);
+            const div = document.createElement('div');
+            div.className = `milestone-card ${achieved ? 'achieved' : ''}`;
+            div.innerHTML = `
+                <span class="milestone-tag">${achieved ? '달성' : '잠김'}</span>
+                <b>${m.name}</b>
+                <p style="font-size:0.8rem; margin:5px 0;">${m.desc}</p>
+                <small style="color:#64748b">목표: ${format(m.target)} 입자</small>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function buy(idx) {
+        const b = buildings[idx];
+        if (state.particles >= b.cost) {
+            state.particles -= b.cost;
+            b.count++;
+            b.cost *= 1.35;
+            state.clickPower = 1 + Math.pow(Math.log10(state.totalParticles + 1), 2);
+        }
+    }
+
+    // 터치 지원 클릭 이벤트
+    document.getElementById('core-node').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        state.particles += state.clickPower;
+        document.getElementById('core-node').style.transform = "scale(0.95)";
+    });
+    document.getElementById('core-node').addEventListener('touchend', () => {
+        document.getElementById('core-node').style.transform = "scale(1)";
+    });
+    document.getElementById('core-node').onclick = () => {
+        state.particles += state.clickPower;
+    };
+
+    // 저장 및 로드
+    function save() {
+        localStorage.setItem('particle_v3_save', JSON.stringify({state, buildings}));
+    }
+    function load() {
+        const data = localStorage.getItem('particle_v3_save');
+        if (data) {
+            const parsed = JSON.parse(data);
+            Object.assign(state, parsed.state);
+            parsed.buildings.forEach((b, i) => Object.assign(buildings[i], b));
+        }
+    }
+
+    load();
+    setInterval(update, 50);
+    setInterval(save, 10000);
+</script>
+
+</body>
+</html>
